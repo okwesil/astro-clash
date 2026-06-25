@@ -1,8 +1,12 @@
 import { Peer, type DataConnection } from "peerjs"
 
-const peer = new Peer()
+function generateId() {
+    return Math.floor(Math.random() * 100000).toString()
+}
+const peer = new Peer(generateId())
 
 export let peerId = new Promise<string>((resolve) => peer.on("open", (id) => resolve(id)))
+export let isHost = false
 let conn: DataConnection | null = null 
  
 export const setOnConnect = (func: () => void) => onConnect = func 
@@ -47,8 +51,8 @@ export function connect(id: string) {
 
 // this client is being connected to by another client
 peer.on('connection', (c) => {
-    console.log('connected')
-    conn = c
+    isHost = true
+    conn = c 
     // @ts-ignore
     c.on('data', (packet: Packet) => callListener(packet))
     onConnect()

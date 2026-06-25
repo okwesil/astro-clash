@@ -1,3 +1,4 @@
+import { setupBackground } from './background'
 import './network'
 import { connect, send, addDataListener, peerId, listeners } from './network'
 
@@ -7,7 +8,10 @@ export function setupMenu() {
 }
 
 function menu() {
+    setBackground(BLACK)
+    setupBackground()
     
+
     const idText = add([
         pos(center().add(vec2(0, -60))),
         anchor('center'),
@@ -22,7 +26,7 @@ function menu() {
     let _peerId: string | null = null
     peerId.then(id => {
         idText.text = 'your id is: ' + id
-        idText.color = rgb(0, 0, 0)
+        idText.color = rgb(255, 255, 255)
         _peerId = id
     })
 

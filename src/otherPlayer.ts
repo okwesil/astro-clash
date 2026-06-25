@@ -1,12 +1,16 @@
-import { addDataListener } from "./network"
+import { addDataListener, isHost } from "./network"
 
 export function setupOtherPlayer() {
-  const OUTLINE_COLOR = rgb(24, 228, 255)
+  const START_POS = !isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
   const player = add([
-    pos(center()),
-    rect(50, 50),
+    pos(START_POS),
+    sprite('cress blue', {
+      anim: 'idle'
+    }),
     color(),
-    outline(4, OUTLINE_COLOR),
+    // body(),
+    scale(),
+    z(3),
     area(),
     rotate(),
     anchor("center"),
@@ -17,7 +21,5 @@ export function setupOtherPlayer() {
     player.pos.y = data.y
   })
 
-  player.onUpdate(() => {
-    player.angle -= 4
-  })
+  return player
 }

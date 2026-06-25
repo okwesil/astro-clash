@@ -1,12 +1,28 @@
-import { send } from "./network"
+import type { Vec2 } from "kaplay"
 import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
+import { setupBackground, setupBoundary } from "./background"
 
 export function setupGame() {
     scene('game', game)
 }
 
+function angleBetween(vector1: Vec2, vector2: Vec2): number {
+    const [ dx, dy ] = [ vector2.x - vector1.x, vector2.y - vector1.y ]
+    return Math.atan2(dy, dx) / (2 * Math.PI) * 360 + 90
+}
+
 function game() {
-    setupPlayer()
-    setupOtherPlayer()
+    setBackground(BLACK)
+    setupBackground()
+    setupBoundary()
+
+    const player = setupPlayer()
+    const otherPlayer = setupOtherPlayer()
+
+    onUpdate(() => {
+        player.angle = angleBetween(player.pos, otherPlayer.pos)
+        otherPlayer.angle = angleBetween(otherPlayer.pos, player.pos)
+
+    })
 }
