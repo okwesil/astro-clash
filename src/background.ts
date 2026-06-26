@@ -2,10 +2,11 @@ function createStar() {
     add([
         sprite('star'),
         pos(rand(vec2(width(), height()))),
-        scale(rand(0.2, .9)),
+        scale(rand(0.2, 1.3)),
+        offscreen({ destroy: true }),
         z(1),
         {
-            direction: rand(vec2(-1), vec2(1)).scale(6)
+            direction: rand(vec2(-1), vec2(1)).scale(12)
         },
         'star'
     ])

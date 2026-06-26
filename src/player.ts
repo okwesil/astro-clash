@@ -7,6 +7,7 @@ export function setupPlayer() {
   const FRICTION = 0.8
   const START_POS = isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
   const player = add([
+    health(100, 100),
     pos(START_POS),
     sprite('cress', {
       anim: 'idle'
@@ -18,10 +19,33 @@ export function setupPlayer() {
     scale(1.2),
     z(3),
     anchor("center"),
+    'solid',
     {
       vel: vec2()
-    }
+    },
   ])
+
+  // red bar
+
+  const HEALTHBAR_HEIGHT = 10
+  add([
+    pos(),
+    rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
+    color(RED),
+    follow(player, vec2(-(player.width / 2), 30))
+  ])
+
+  // green bar
+  const healthbar = add([
+    pos(),
+    rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
+    color(GREEN),
+    follow(player, vec2(-(player.width / 2), 30))
+  ])
+
+  player.onHurt(() => {
+    healthbar.width = (player.hp() / (player.maxHP() as number)) * player.width
+  })
 
   let lastPos = player.pos
 
@@ -46,6 +70,16 @@ export function setupPlayer() {
     player.move(player.vel)
     player.vel = player.vel.scale(FRICTION)
     keepPlayerOnScreen()
+
+    if (Math.abs(player.vel.x) > 0.2) {
+      if (player.getCurAnim()?.name != 'thruster') {
+        player.play('thruster')
+      } 
+    } else {
+      if (player.getCurAnim()?.name != 'idle') {
+        player.play('idle')
+      } 
+    }
 
     if (Math.floor(player.pos.x) == Math.floor(lastPos.x) && Math.floor(player.pos.y) == Math.floor(lastPos.y)) return
     send('movement',  player.pos)
@@ -77,6 +111,7 @@ export function setupPlayer() {
         pos: vec2(player.pos.add(shootOnLeftSide ? vec2(-CENTER_OFFSET, 0) : vec2(CENTER_OFFSET, 0))), 
         direction: player.angle, 
         speed: 15,
+        damage: 1
       }
 
       shoot(data, true)

@@ -2,6 +2,7 @@ import type { Vec2 } from "kaplay"
 import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
 import { setupBackground } from "./background"
+import { createLaserCollisionParticles, projFunctions } from "./projectiles"
 
 export function setupGame() {
     scene('game', game)
@@ -19,10 +20,23 @@ function game() {
     const player = setupPlayer()
     const otherPlayer = setupOtherPlayer()
 
-    player.onCollide('blue projectile', (proj) => {
+    player.onCollide('enemy projectile', (proj) => {
         proj.destroy()
-        
+        player.hurt(proj.damage)
+        // @ts-ignore
+        projFunctions[proj.type].onHit(player, proj)
     })
+
+    otherPlayer.onCollide('friendly projectile', (proj) => {
+        proj.destroy()
+    })
+
+    onCollide('enemy projectile', 'friendly projectile', (a, b) => {
+        createLaserCollisionParticles(a.pos)
+        a.destroy()
+        b.destroy()
+    })
+
 
     onUpdate(() => {
         player.angle = angleBetween(player.pos, otherPlayer.pos)

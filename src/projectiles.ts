@@ -1,30 +1,33 @@
-import type { GameObj, Vec2, SpriteComp, AreaComp, PosComp, RotateComp } from "kaplay"
+import type { Vec2 } from "kaplay"
 import { send } from "./network"
+import type { setupPlayer } from "./player"
 
 type ProjectileType = 'cress laser'
 
 export type ProjectileData = { 
     type: ProjectileType
+    damage: number
     sprite: string
     pos: Vec2
     direction: number
     speed: number
 }
 
-type updateFunction = (self: ProjectileObject) => void
-const updateFunctions: Record<ProjectileType, updateFunction> = {
-    'cress laser': (self) => {
-        // @ts-ignore
-        self.pos = self.pos.add(Vec2.fromAngle(self.direction).scale(self.speed)) 
+type projFunction = (self: ProjectileObject) => void
+type onHitFunction = (player: ReturnType<typeof setupPlayer>, self: ProjectileObject) => void
+export const projFunctions: Record<ProjectileType, { update: projFunction, onHit: onHitFunction }> = {
+    'cress laser': {
+        update: (self) => {
+            // @ts-ignore
+            self.pos = self.pos.add(Vec2.fromAngle(self.direction).scale(self.speed)) 
+        },
+        onHit: (player, self) => {
+            player.hurt(self.damage)
+        }
     }
 }
 
-export type ProjectileObject = GameObj<
-    SpriteComp | AreaComp | PosComp | RotateComp | {
-    speed: number
-    direction: number
-    _onUpdate: (self: ProjectileObject) => void
-}>
+export type ProjectileObject = ReturnType<typeof shoot>
 
 export function shoot(data: ProjectileData, sending: boolean) {
     const proj = add([
@@ -35,12 +38,13 @@ export function shoot(data: ProjectileData, sending: boolean) {
         anchor('center'),
         offscreen({ destroy: true }),
         scale(1.5),
-        (!sending ? 'blue projectile' : ''),
+        (!sending ? 'enemy projectile' : 'friendly projectile'),
+        'solid',
         {
             type: data.type,
             speed: data.speed,
             direction: data.direction - 90,
-            _onUpdate: updateFunctions[data.type]
+            damage: data.damage,
         }
     ])
     
@@ -49,6 +53,15 @@ export function shoot(data: ProjectileData, sending: boolean) {
     }
 
     proj.onUpdate(() => {
-        proj._onUpdate(proj)
+        projFunctions[proj.type].update(proj)
     })
+    return proj
+}
+export function createLaserCollisionParticles(position: Vec2) {
+    const particles = add([
+        sprite('laser collide', { anim: 'expand', animSpeed: 2 }),
+        pos(position),
+        scale(3)
+    ])
+    particles.onAnimEnd(() => particles.destroy())
 }

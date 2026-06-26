@@ -22,7 +22,7 @@ loadSprite('cress', 'src/assets/cress/cress.png', {
     },
 
     idle: {
-      from: 4,
+      from: 5,
       to: 7,
     }
   }
@@ -49,6 +49,16 @@ loadSprite('cress bullet', 'src/assets/cress/cress-bullet.png')
 loadSprite('cress bullet blue', 'src/assets/cress/cress-bullet-blue.png')
 
 loadSprite('star','src/assets/star.png' )
+loadSprite('laser collide', 'src/assets/laser-collision.png', {
+  sliceX: 2,
+  sliceY: 2,
+  anims: {
+    expand: {
+      from: 0,
+      to: 3
+    }
+  }
+})
 
 // setupPlayer()
 setOnConnect(() => go('game'))

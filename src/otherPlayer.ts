@@ -15,6 +15,7 @@ export function setupOtherPlayer() {
     area(),
     rotate(),
     anchor("center"),
+    'solid'
   ])
 
   addDataListener('movement', (data) => {

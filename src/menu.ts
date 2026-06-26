@@ -1,6 +1,6 @@
 import { setupBackground } from './background'
 import './network'
-import { connect, send, addDataListener, peerId, listeners } from './network'
+import { connect, peerId } from './network'
 
 
 export function setupMenu() {
