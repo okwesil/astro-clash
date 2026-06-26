@@ -1,4 +1,4 @@
-import { addDataListener, isHost } from "./network"
+import { setDataListener, isHost } from "./network"
 import { shoot } from "./projectiles"
 
 export function setupOtherPlayer() {
@@ -18,12 +18,12 @@ export function setupOtherPlayer() {
     'solid'
   ])
 
-  addDataListener('movement', (data) => {
+  setDataListener('movement', (data) => {
     player.pos.x = data.x
     player.pos.y = data.y
   })
 
-  addDataListener('projectileShot', (data) => {
+  setDataListener('projectileShot', (data) => {
     shoot(data, false)
   })
 

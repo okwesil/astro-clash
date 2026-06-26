@@ -18,7 +18,8 @@ let onConnect = () => {}
 type PacketMap = {
     all: Packet
     movement: Vec2
-    'projectileShot': ProjectileData
+    projectileShot: ProjectileData
+    death: { hostWon: boolean }
 }
 
 type Packet =
@@ -27,33 +28,35 @@ type Packet =
 type Listener<TData> = (data: TData) => void
 
 type ListenerMap = {
-    all: Listener<Packet>[]
-} & {
-    [K in keyof PacketMap]: Listener<PacketMap[K]>[]
+    [K in keyof PacketMap]: Listener<PacketMap[K]>
 }
 
 export const listeners: ListenerMap = {
-    all: [],
-    movement: [],
-    'projectileShot': []
+    all: () => {},
+    movement: () => {},
+    projectileShot: () => {},
+    death: () => {}
 }
 
-export function addDataListener<K extends keyof PacketMap>(type: K, func: Listener<PacketMap[K]>): void {
-    listeners[type].push(func as never)
+export function setDataListener<K extends keyof PacketMap>(type: K, func: ListenerMap[K]): void {
+    listeners[type] = func
 }
 
 function callListener(packet: Packet) {
     switch (packet.type) {
-        case 'movement':
-            for (const listener of listeners.movement) listener(packet.data)
+        case "all":
+            listeners.all(packet.data)
             break
-        case 'projectileShot':
-            for (const listener of listeners.projectileShot) listener(packet.data)
+        case "movement":
+            listeners.movement(packet.data)
             break
-    }
-
-    for (const listener of listeners.all) {
-        listener(packet)
+        case "projectileShot":
+            listeners.projectileShot(packet.data)
+            break
+        case "death":
+            listeners.death(packet.data)
+            break
+            
     }
 }
 

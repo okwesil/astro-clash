@@ -13,6 +13,7 @@ function createStar() {
 }
 
 export function setupBackground() {
+    setBackground(BLACK)
     for (let i = 0; i < 76; i++) {
         createStar()
     }

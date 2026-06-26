@@ -1,3 +1,4 @@
+import { paused } from "./game"
 import { isHost, send } from "./network"
 import { shoot, type ProjectileData } from "./projectiles"
 
@@ -43,6 +44,10 @@ export function setupPlayer() {
     follow(player, vec2(-(player.width / 2), 30))
   ])
 
+
+  player.onHeal(() => {
+    healthbar.width = (player.hp() / (player.maxHP() as number)) * player.width
+  })
   player.onHurt(() => {
     healthbar.width = (player.hp() / (player.maxHP() as number)) * player.width
   })
@@ -67,6 +72,8 @@ export function setupPlayer() {
 
 
   player.onUpdate(() => {
+    if (paused) { player.vel = vec2(); return }
+
     player.move(player.vel)
     player.vel = player.vel.scale(FRICTION)
     keepPlayerOnScreen()
@@ -103,7 +110,7 @@ export function setupPlayer() {
   let shootOnLeftSide = false
   const CENTER_OFFSET = 22
   onKeyDown(['z'], () => {
-    if (Date.now() - lastShotTime > SHOT_COOLDOWN) {
+    if (!paused && Date.now() - lastShotTime > SHOT_COOLDOWN) {
 
       const data: ProjectileData = { 
         type: 'cress laser',

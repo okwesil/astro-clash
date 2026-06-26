@@ -39,7 +39,7 @@ export function shoot(data: ProjectileData, sending: boolean) {
         offscreen({ destroy: true }),
         scale(1.5),
         (!sending ? 'enemy projectile' : 'friendly projectile'),
-        'solid',
+        'projectile',
         {
             type: data.type,
             speed: data.speed,
@@ -47,6 +47,7 @@ export function shoot(data: ProjectileData, sending: boolean) {
             damage: data.damage,
         }
     ])
+
     
     if (sending) {
         send('projectileShot', data)
