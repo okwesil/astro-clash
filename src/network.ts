@@ -21,6 +21,7 @@ type PacketMap = {
     projectileShot: ProjectileData
     death: { hostWon: boolean }
     healthChange: { maxHP: number, currentValue: number }
+    stunFrames: { frames: number }
 }
 
 type Packet =
@@ -38,6 +39,7 @@ export const listeners: ListenerMap = {
     projectileShot: () => {},
     death: () => {},
     healthChange: () => {},
+    stunFrames: () => {},
 }
 
 export function setDataListener<K extends keyof PacketMap>(type: K, func: ListenerMap[K]): void {

@@ -1,4 +1,3 @@
-import type { Vec2 } from "kaplay"
 import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
 import { setupBackground } from "./background"
@@ -10,7 +9,8 @@ export function setupGame() {
     scene('game', game)
 }
 
-function angleBetween(vector1: Vec2, vector2: Vec2): number {
+export type Vector = ReturnType<typeof vec2>
+function angleBetween(vector1: Vector, vector2: Vector): number {
     const [ dx, dy ] = [ vector2.x - vector1.x, vector2.y - vector1.y ]
     return Math.atan2(dy, dx) / (2 * Math.PI) * 360 + 90
 }
@@ -24,6 +24,8 @@ async function game() {
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore
         projFunctions[proj.type].onHit(player, proj)
+        player.stun(20)
+        player.knockback(Vec2.fromAngle(proj.direction), 180)
         createLaserCollisionParticles(proj.pos)
         proj.destroy()
     })

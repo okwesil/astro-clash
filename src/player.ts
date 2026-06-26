@@ -1,12 +1,13 @@
-import { paused } from "./game"
+import { paused, type Vector } from "./game"
 import { isHost, send } from "./network"
 import { shoot, type ProjectileData } from "./projectiles"
 
+export const MAX_STUN = 40
 export function setupPlayer() {
-  const OUTLINE_COLOR = rgb(255, 24, 24)
   const SPEED = 80
   const FRICTION = 0.8
   const START_POS = isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
+
   const player = add([
     health(100, 100),
     pos(START_POS),
@@ -14,7 +15,6 @@ export function setupPlayer() {
       anim: 'idle'
     }),
     color(),
-    outline(4, OUTLINE_COLOR),
     area(),
     rotate(),
     scale(1.2),
@@ -23,14 +23,24 @@ export function setupPlayer() {
     opacity(1),
     'solid',
     {
-      vel: vec2()
+      vel: vec2(),
+      knockbackVel: vec2(),
+      stun: (duration: number) => {
+        stunFrames = Math.min(duration, MAX_STUN)
+      },
+      knockback: (direction: Vector, strength: number) => {
+        player.knockbackVel = player.knockbackVel.add(direction.scale(strength))
+      }
     },
   ])
+
+  let stunFrames = 0
 
 
   player.onHeal(() => {
     send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
   })
+
   let blinking = false
   let blinkingFrequency = 8
   player.onHurt(() => {
@@ -60,17 +70,33 @@ export function setupPlayer() {
     if (top < 0) player.pos.y = halfWidth
 
   }
-
-
+  
   player.onUpdate(() => {
     if (paused) { player.vel = vec2(); return }
 
     player.move(player.vel)
+    player.vel = player.vel.add(player.knockbackVel)
     player.vel = player.vel.scale(FRICTION)
+    player.knockbackVel = player.knockbackVel.scale(FRICTION)
+
+
     keepPlayerOnScreen()
 
     if (blinking) {
       player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
+    }
+
+    if (stunFrames > 0) {
+      drawCircle({
+        pos: player.pos,
+        radius: player.width + 3,
+        color: WHITE,
+        fill: false,
+        outline:{ width: 4, color: WHITE, opacity: (stunFrames / MAX_STUN)},
+        anchor: 'center',
+      })
+      send('stunFrames', { frames: stunFrames })
+      stunFrames--
     }
 
     if (Math.abs(player.vel.x) > 0.2) {
@@ -89,15 +115,19 @@ export function setupPlayer() {
   })
 
   onKeyDown(['w', 'up'], () => {
+    if (stunFrames > 0) return
     player.vel = player.vel.add(vec2(0, -SPEED))
   })
   onKeyDown(['s', 'down'], () => {
+    if (stunFrames > 0) return
     player.vel = player.vel.add(vec2(0, SPEED))
   })
   onKeyDown(['a', 'left'], () => {
+    if (stunFrames > 0) return
     player.vel = player.vel.add(vec2(-SPEED, 0))
   })
   onKeyDown(['d', 'right'], () => {
+    if (stunFrames > 0) return
     player.vel = player.vel.add(vec2(SPEED, 0))
   })
 
@@ -106,7 +136,7 @@ export function setupPlayer() {
   let shootOnLeftSide = false
   const CENTER_OFFSET = 22
   onKeyDown(['z'], () => {
-    if (!paused && Date.now() - lastShotTime > SHOT_COOLDOWN) {
+    if (!paused && stunFrames == 0 && Date.now() - lastShotTime > SHOT_COOLDOWN) {
 
       const data: ProjectileData = { 
         type: 'cress laser',

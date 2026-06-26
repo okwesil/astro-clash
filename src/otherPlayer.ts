@@ -1,4 +1,5 @@
 import { setDataListener, isHost } from "./network"
+import { MAX_STUN } from "./player"
 import { shoot } from "./projectiles"
 
 export function setupOtherPlayer() {
@@ -50,9 +51,22 @@ export function setupOtherPlayer() {
     }
   })
 
+  
+  let stunFrames = 0
   player.onUpdate(() => {
     if (blinking) {
       player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
+    }
+
+    if (stunFrames > 0) {
+      drawCircle({
+        pos: player.pos,
+        radius: player.width + 3,
+        color: WHITE,
+        anchor: 'center',
+        start: 359 - stunFrames / MAX_STUN * 359,
+      })
+      stunFrames--
     }
   })
 
@@ -63,6 +77,10 @@ export function setupOtherPlayer() {
 
   setDataListener('projectileShot', (data) => {
     shoot(data, false)
+  })
+
+  setDataListener('stunFrames', ({ frames }) => {
+    stunFrames = frames
   })
 
   return player
