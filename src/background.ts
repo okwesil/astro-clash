@@ -6,7 +6,7 @@ function createStar() {
         offscreen({ destroy: true }),
         z(1),
         {
-            direction: rand(vec2(-1), vec2(1)).scale(12)
+            direction: rand(vec2(-1), vec2(1)).scale(3)
         },
         'star'
     ])

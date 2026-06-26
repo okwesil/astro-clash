@@ -20,6 +20,7 @@ export function setupPlayer() {
     scale(1.2),
     z(3),
     anchor("center"),
+    opacity(1),
     'solid',
     {
       vel: vec2()
@@ -30,7 +31,15 @@ export function setupPlayer() {
   player.onHeal(() => {
     send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
   })
+  let blinking = false
+  let blinkingFrequency = 8
   player.onHurt(() => {
+    if (player.hp() < (player.maxHP() as number) * 0.65) {
+      blinking = true
+    }
+    if (player.hp() < (player.maxHP() as number) * 0.25) {
+      blinkingFrequency = 1
+    }
     send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
   })
 
@@ -60,6 +69,10 @@ export function setupPlayer() {
     player.vel = player.vel.scale(FRICTION)
     keepPlayerOnScreen()
 
+    if (blinking) {
+      player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
+    }
+
     if (Math.abs(player.vel.x) > 0.2) {
       if (player.getCurAnim()?.name != 'thruster') {
         player.play('thruster')
@@ -87,6 +100,7 @@ export function setupPlayer() {
   onKeyDown(['d', 'right'], () => {
     player.vel = player.vel.add(vec2(SPEED, 0))
   })
+
   const SHOT_COOLDOWN = 150
   let lastShotTime = 0
   let shootOnLeftSide = false
@@ -100,7 +114,7 @@ export function setupPlayer() {
         pos: vec2(player.pos.add(shootOnLeftSide ? vec2(-CENTER_OFFSET, 0) : vec2(CENTER_OFFSET, 0))), 
         direction: player.angle, 
         speed: 15,
-        damage: 1
+        damage: 10
       }
 
       shoot(data, true)

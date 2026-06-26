@@ -24,11 +24,13 @@ async function game() {
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore
         projFunctions[proj.type].onHit(player, proj)
+        createLaserCollisionParticles(proj.pos)
         proj.destroy()
     })
 
     otherPlayer.onCollide('friendly projectile', (proj) => {
         proj.destroy()
+        createLaserCollisionParticles(proj.pos)
     })
 
     onCollide('enemy projectile', 'friendly projectile', (a, b) => {
@@ -60,14 +62,20 @@ async function game() {
         const countdown = add([
             pos(center()),
             anchor('center'),
-            text(start.toString(), { size: 100 })
+            text(start.toString(), { size: 100 }),
+            opacity(1),
+            animate()
         ])
     
         for (let i = start - 1; i >= 0; i--) {
             await wait(0.4)
+            countdown.animate('opacity', [0, 1], { duration: 0.4 })            
             countdown.text = i.toString()
         }
-        countdown.destroy()
+        countdown.text = 'GO!'
+        wait(0.3, () => {
+            countdown.destroy()
+        })
         paused = false
     }
     

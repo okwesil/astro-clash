@@ -15,6 +15,7 @@ export function setupOtherPlayer() {
     area(),
     rotate(),
     anchor("center"),
+    opacity(1),
     'solid'
   ])
 
@@ -32,13 +33,28 @@ export function setupOtherPlayer() {
     pos(),
     rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
     color(GREEN),
-    follow(player, vec2(-(player.width / 2), 30))
+    follow(player, vec2(-(player.width / 2), 30)),
+    timer()
   ])
 
+  let blinking = false
+  let blinkingFrequency = 8
   setDataListener('healthChange', ({ maxHP, currentValue }) => {
-    healthbar.width = (currentValue / maxHP) * player.width
+    healthbar.tween(healthbar.width, (currentValue / maxHP) * player.width, .2, (value) => (healthbar.width = value))
+
+    if (currentValue < maxHP * 0.65) {
+      blinking = true
+    }
+    if (currentValue < maxHP * 0.25) {
+      blinkingFrequency = 1
+    }
   })
 
+  player.onUpdate(() => {
+    if (blinking) {
+      player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
+    }
+  })
 
   setDataListener('movement', (data) => {
     player.pos.x = data.x
