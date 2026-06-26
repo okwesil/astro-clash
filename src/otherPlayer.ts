@@ -18,6 +18,28 @@ export function setupOtherPlayer() {
     'solid'
   ])
 
+  const HEALTHBAR_HEIGHT = 10
+  // red bar
+  add([
+    pos(),
+    rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
+    color(RED),
+    follow(player, vec2(-(player.width / 2), 30))
+  ])
+
+  // green bar
+  const healthbar = add([
+    pos(),
+    rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
+    color(GREEN),
+    follow(player, vec2(-(player.width / 2), 30))
+  ])
+
+  setDataListener('healthChange', ({ maxHP, currentValue }) => {
+    healthbar.width = (currentValue / maxHP) * player.width
+  })
+
+
   setDataListener('movement', (data) => {
     player.pos.x = data.x
     player.pos.y = data.y

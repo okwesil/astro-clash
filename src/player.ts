@@ -26,30 +26,12 @@ export function setupPlayer() {
     },
   ])
 
-  // red bar
-
-  const HEALTHBAR_HEIGHT = 10
-  add([
-    pos(),
-    rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
-    color(RED),
-    follow(player, vec2(-(player.width / 2), 30))
-  ])
-
-  // green bar
-  const healthbar = add([
-    pos(),
-    rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
-    color(GREEN),
-    follow(player, vec2(-(player.width / 2), 30))
-  ])
-
 
   player.onHeal(() => {
-    healthbar.width = (player.hp() / (player.maxHP() as number)) * player.width
+    send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
   })
   player.onHurt(() => {
-    healthbar.width = (player.hp() / (player.maxHP() as number)) * player.width
+    send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
   })
 
   let lastPos = player.pos

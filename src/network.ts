@@ -1,13 +1,13 @@
-import { Peer, type DataConnection } from "peerjs"
-import type { Vec2 } from "kaplay"
-import type { ProjectileData } from "./projectiles"
+import { Peer, type DataConnection } from 'peerjs'
+import type { Vec2 } from 'kaplay'
+import type { ProjectileData } from './projectiles'
 
 function generateId() {
     return Math.floor(Math.random() * 100000).toString()
 }
 const peer = new Peer(generateId())
 
-export let peerId = new Promise<string>((resolve) => peer.on("open", (id) => resolve(id)))
+export let peerId = new Promise<string>((resolve) => peer.on('open', (id) => resolve(id)))
 export let isHost = false
 let conn: DataConnection | null = null 
  
@@ -20,6 +20,7 @@ type PacketMap = {
     movement: Vec2
     projectileShot: ProjectileData
     death: { hostWon: boolean }
+    healthChange: { maxHP: number, currentValue: number }
 }
 
 type Packet =
@@ -35,7 +36,8 @@ export const listeners: ListenerMap = {
     all: () => {},
     movement: () => {},
     projectileShot: () => {},
-    death: () => {}
+    death: () => {},
+    healthChange: () => {},
 }
 
 export function setDataListener<K extends keyof PacketMap>(type: K, func: ListenerMap[K]): void {
@@ -44,19 +46,21 @@ export function setDataListener<K extends keyof PacketMap>(type: K, func: Listen
 
 function callListener(packet: Packet) {
     switch (packet.type) {
-        case "all":
+        case 'all':
             listeners.all(packet.data)
             break
-        case "movement":
+        case 'movement':
             listeners.movement(packet.data)
             break
-        case "projectileShot":
+        case 'projectileShot':
             listeners.projectileShot(packet.data)
             break
-        case "death":
+        case 'death':
             listeners.death(packet.data)
             break
-            
+        case 'healthChange':
+            listeners.healthChange(packet.data)
+            break
     }
 }
 
