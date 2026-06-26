@@ -1,4 +1,5 @@
 import { addDataListener, isHost } from "./network"
+import { shoot } from "./projectiles"
 
 export function setupOtherPlayer() {
   const START_POS = !isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
@@ -9,7 +10,7 @@ export function setupOtherPlayer() {
     }),
     color(),
     // body(),
-    scale(),
+    scale(1.2),
     z(3),
     area(),
     rotate(),
@@ -21,5 +22,10 @@ export function setupOtherPlayer() {
     player.pos.y = data.y
   })
 
+  addDataListener('projectileShot', (data) => {
+    shoot(data, false)
+  })
+
   return player
+
 }

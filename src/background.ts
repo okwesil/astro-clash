@@ -1,9 +1,9 @@
 function createStar() {
-    const star = add([
+    add([
         sprite('star'),
         pos(rand(vec2(width(), height()))),
         scale(rand(0.2, .9)),
-        z(2),
+        z(1),
         {
             direction: rand(vec2(-1), vec2(1)).scale(6)
         },
@@ -26,23 +26,4 @@ export function setupBackground() {
             lastDeletionTime = Date.now()
         }
     })
-}
-
-const FREQUENCY = 20
-export const BOUNDARY_SIZE = 550
-export function setupBoundary() {
-    const boundary = add([
-        pos(center()),
-        rect(BOUNDARY_SIZE, BOUNDARY_SIZE, { fill: false }),
-        outline(4, RED),
-        z(1),
-        opacity(0.6),
-        anchor('center')
-    ])
-    
-    boundary.onUpdate(() => {
-        boundary.opacity = (Math.sin(debug.numFrames() / FREQUENCY) + 1.5) / 3
-    })
-
-    
 }

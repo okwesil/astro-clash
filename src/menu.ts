@@ -52,6 +52,11 @@ function menu() {
         }
     })
 
+    
+    onKeyPress('p', () => {
+        go('game')
+    })
+
     idText.onClick(() => {
         if (_peerId) {
             navigator.clipboard.writeText(_peerId)

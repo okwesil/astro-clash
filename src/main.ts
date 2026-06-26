@@ -12,7 +12,7 @@ kaplay({
   maxFPS: 60
 })
 
-loadSprite('cress', 'src/assets/cress.png', {
+loadSprite('cress', 'src/assets/cress/cress.png', {
   sliceX: 4,
   sliceY: 2,
   anims: {
@@ -28,7 +28,8 @@ loadSprite('cress', 'src/assets/cress.png', {
   }
 })
 
-loadSprite('cress blue', 'src/assets/cress-blue.png', {
+
+loadSprite('cress blue', 'src/assets/cress/cress-blue.png', {
   sliceX: 4,
   sliceY: 2,
   anims: {
@@ -43,6 +44,9 @@ loadSprite('cress blue', 'src/assets/cress-blue.png', {
     }
   }
 })
+
+loadSprite('cress bullet', 'src/assets/cress/cress-bullet.png')
+loadSprite('cress bullet blue', 'src/assets/cress/cress-bullet-blue.png')
 
 loadSprite('star','src/assets/star.png' )
 

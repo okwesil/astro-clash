@@ -1,4 +1,6 @@
 import { Peer, type DataConnection } from "peerjs"
+import type { Vec2 } from "kaplay"
+import type { ProjectileData } from "./projectiles"
 
 function generateId() {
     return Math.floor(Math.random() * 100000).toString()
@@ -13,22 +15,41 @@ export const setOnConnect = (func: () => void) => onConnect = func
 let onConnect = () => {}
 
 
-type Listener = (data: unknown) => void
-type PacketType = 'movement' | 'all'
-
-type Packet = { type: PacketType; data: unknown }
-
-export const listeners: Record<PacketType, Listener[]> = {
-    'all': [],
-    'movement': []
+type PacketMap = {
+    all: Packet
+    movement: Vec2
+    'projectileShot': ProjectileData
 }
-export function addDataListener(type: PacketType, func: Listener) {
-    listeners[type].push(func)
+
+type Packet =
+    { [K in keyof PacketMap]: { type: K; data: PacketMap[K] } }[keyof PacketMap]
+
+type Listener<TData> = (data: TData) => void
+
+type ListenerMap = {
+    all: Listener<Packet>[]
+} & {
+    [K in keyof PacketMap]: Listener<PacketMap[K]>[]
+}
+
+export const listeners: ListenerMap = {
+    all: [],
+    movement: [],
+    'projectileShot': []
+}
+
+export function addDataListener<K extends keyof PacketMap>(type: K, func: Listener<PacketMap[K]>): void {
+    listeners[type].push(func as never)
 }
 
 function callListener(packet: Packet) {
-    for (const listener of listeners[packet.type]) {
-        listener(packet.data)
+    switch (packet.type) {
+        case 'movement':
+            for (const listener of listeners.movement) listener(packet.data)
+            break
+        case 'projectileShot':
+            for (const listener of listeners.projectileShot) listener(packet.data)
+            break
     }
 
     for (const listener of listeners.all) {
@@ -36,9 +57,9 @@ function callListener(packet: Packet) {
     }
 }
 
-export function send(type: PacketType, data: unknown) {
+export function send<K extends keyof PacketMap>(type: K, data: PacketMap[K]) {
     if (!conn) return
-    conn.send({type, data})
+    conn.send({ type, data })
 }
 
 // this client is trying to connect to another client

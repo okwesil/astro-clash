@@ -1,7 +1,7 @@
 import type { Vec2 } from "kaplay"
 import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
-import { setupBackground, setupBoundary } from "./background"
+import { setupBackground } from "./background"
 
 export function setupGame() {
     scene('game', game)
@@ -15,10 +15,14 @@ function angleBetween(vector1: Vec2, vector2: Vec2): number {
 function game() {
     setBackground(BLACK)
     setupBackground()
-    setupBoundary()
 
     const player = setupPlayer()
     const otherPlayer = setupOtherPlayer()
+
+    player.onCollide('blue projectile', (proj) => {
+        proj.destroy()
+        
+    })
 
     onUpdate(() => {
         player.angle = angleBetween(player.pos, otherPlayer.pos)
