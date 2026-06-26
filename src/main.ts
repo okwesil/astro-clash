@@ -18,7 +18,8 @@ console.log('main.ts loaded', window.location.href)
 export const ZLevels = [
   'stars',
   'healthbar',
-  'players',
+  'other player',
+  'current player',
   'laser',
   'railgun'
 ]

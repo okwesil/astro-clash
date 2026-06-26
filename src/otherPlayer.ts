@@ -13,7 +13,7 @@ export function setupOtherPlayer() {
     }),
     color(),
     scale(1.2),
-    z(ZLevels.indexOf('players')),
+    z(ZLevels.indexOf('other player')),
     area(),
     rotate(isHost ? 180 : 0),
     anchor("center"),
@@ -62,20 +62,21 @@ export function setupOtherPlayer() {
       player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
     }
 
-    if (railgunChargeCompletion > 0) {
-      drawChargeCircle(player.pos, player.width, railgunChargeCompletion)
-    }
-
-    if (railgunChargeCompletion != 1) {
+    if (railgunChargeCompletion == 0) {
       player.angle = angleBetween(player.pos, player.otherPlayersPos)
-    } else {
-      drawRailgunAimingLine(player.pos, player.angle, railgunChargeCompletion)
+    }
+  })
+
+  player.onDraw(() => {
+    if (railgunChargeCompletion > 0) {
+      drawRailgunAimingLine(vec2(), 0, railgunChargeCompletion)
+      drawChargeCircle(vec2(), player.width, railgunChargeCompletion)
     }
 
-    
     if (stunFrames > 0) {
-      drawStunCircle(player.pos, player.width + 3, stunFrames)
+      drawStunCircle(vec2(), player.width + 3, stunFrames)
     }
+
   })
 
   setDataListener('movement', (data) => {
@@ -103,7 +104,6 @@ export function setupOtherPlayer() {
 
   setDataListener('aimingRailgun', ({ angle }) => {
     player.angle = angle
-    drawRailgunAimingLine(player.pos, angle, railgunChargeCompletion)
   })
   
   setDataListener('fireRailgun', () => {

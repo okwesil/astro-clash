@@ -75,7 +75,7 @@ export function setDataListener<K extends keyof PacketMap>(type: K, func: Listen
 }
 
 function callListener(packet: Packet) {
-    console.log('inbound packet', packet)
+    // console.log('inbound packet', packet)
     listeners.all(packet)
     for (const type of Object.keys(listeners) as Array<keyof PacketMap>) {
         if (type !== 'all' && packet.type === type) {
@@ -94,7 +94,7 @@ export function send<K extends keyof PacketMap>(type: K, data: PacketMap[K]) {
         console.log('send dropped: conn not open', type, data)
         return
     }
-    console.log('sending packet', type, data)
+    // console.log('sending packet', type, data)
     conn.send({ type, data })
 }
 

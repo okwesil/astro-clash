@@ -26,7 +26,6 @@ export function drawChargeCircle(pos: Vector, width: number, completion: number)
     fill: false,
     outline: { width: 5, color, opacity: 1 },
     start: 360 - (completion * 360),
-    
   })
 }
 
@@ -50,6 +49,7 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
     pos(position),
     area({ scale: vec2(0.1, 1)}),
     rotate(angle),
+    z(ZLevels.indexOf('railgun')),
     (red ? 'friendly railgun' : 'enemy railgun')
   ])
 
@@ -86,7 +86,7 @@ export function setupPlayer() {
     area(),
     rotate(isHost ? 180 : 0),
     scale(1.2),
-    z(ZLevels.indexOf('players')),
+    z(ZLevels.indexOf('current player')),
     anchor("center"),
     opacity(1),
     'current player',
@@ -155,10 +155,7 @@ export function setupPlayer() {
 
     if (elapsedCharge == 0) {
       player.angle = angleBetween(player.pos, player.otherPlayersPos)
-    } else {
-      drawRailgunAimingLine(player.pos, player.angle, elapsedCharge / RAILGUN_CHARGE_TIME)
     }
-
 
     if (blinking) {
       player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
@@ -184,6 +181,13 @@ export function setupPlayer() {
     if (Math.floor(player.pos.x) == Math.floor(lastPos.x) && Math.floor(player.pos.y) == Math.floor(lastPos.y)) return
     send('movement',  player.pos)
     lastPos = player.pos
+  })
+
+  player.onDraw(() => {
+    if (elapsedCharge > 0) {
+      drawChargeCircle(vec2(), player.width + 3, elapsedCharge / RAILGUN_CHARGE_TIME)
+      drawRailgunAimingLine(vec2(), 0, elapsedCharge / RAILGUN_CHARGE_TIME)
+    }
   })
 
   onKeyDown(['w', 'up'], () => {
@@ -230,7 +234,6 @@ export function setupPlayer() {
       alreadySentFullCompletion = true
       send('railgunCharge', { completion: 1 })
     }
-    drawChargeCircle(player.pos, player.width + 3, elapsedCharge / RAILGUN_CHARGE_TIME)
   })
 
   onKeyRelease(['x'], () => {

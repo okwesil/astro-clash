@@ -28,7 +28,6 @@ function boom(position: Vector) {
 
 async function game() {
     setupBackground()
-    setDataListener('all', (packet) =>  console.log(packet))
     const player = setupPlayer()
     const otherPlayer = setupOtherPlayer()
 
