@@ -10,25 +10,39 @@ export function setupGame() {
 }
 
 export type Vector = ReturnType<typeof vec2>
-function angleBetween(vector1: Vector, vector2: Vector): number {
-    const [ dx, dy ] = [ vector2.x - vector1.x, vector2.y - vector1.y ]
+export function angleBetween(p1: Vector, p2: Vector): number {
+    const [ dx, dy ] = [ p2.x - p1.x, p2.y - p1.y ]
     return Math.atan2(dy, dx) / (2 * Math.PI) * 360 + 90
+}
+
+function boom(position: Vector) {
+    add([
+        sprite('boom', {
+            anim: 'expand'
+        }),
+        scale(3),
+        pos(position),
+        anchor('center'),
+    ])
 }
 
 async function game() {
     setupBackground()
+    setDataListener('all', (packet) =>  console.log(packet))
     const player = setupPlayer()
     const otherPlayer = setupOtherPlayer()
-    console.log(player.hp())
 
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore
         projFunctions[proj.type].onHit(player, proj)
-        player.stun(20)
-        player.knockback(Vec2.fromAngle(proj.direction), 180)
         createLaserCollisionParticles(proj.pos)
         proj.destroy()
     })
+
+    player.onCollide('enemy railgun', () => {
+        wait(0.1, () =>  player.hurt(100))
+    })
+
 
     otherPlayer.onCollide('friendly projectile', (proj) => {
         proj.destroy()
@@ -43,19 +57,39 @@ async function game() {
 
     player.onDeath(() => {
         showWin(!isHost)
+        boom(player.pos)
+        player.destroy()
         send('death', { hostWon: !isHost })
     })
     setDataListener('death', ({ hostWon }) => {
         if (!paused) {
+            boom(otherPlayer.pos)
+            otherPlayer.destroy()
             showWin(hostWon)
         }
     })
 
     onUpdate(() => {
-        player.angle = angleBetween(player.pos, otherPlayer.pos)
-        otherPlayer.angle = angleBetween(otherPlayer.pos, player.pos)
-
+        player.otherPlayersPos = otherPlayer.pos
+        otherPlayer.otherPlayersPos = player.pos
     })
+
+    let sentPing = false
+    let timePingWasSent = 0
+    onKeyPress('2', () => {
+        send('ping', null)
+        sentPing = true
+        timePingWasSent = performance.now()
+    })
+    setDataListener('ping', () => {
+        if (!sentPing) { 
+            send('ping', null) 
+        } else {
+            debug.log(`${performance.now() - timePingWasSent}ms`)
+            sentPing = false
+        }
+    })
+
     await showCountdown(3)
 
 
@@ -89,7 +123,6 @@ async function game() {
             pos(center()),
             anchor('center'),
         ])
-        query({include: 'projectile'}).forEach(proj => proj.destroy())
         wait(1, async () => {
             textObject.destroy()
             go('game')

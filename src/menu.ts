@@ -4,6 +4,7 @@ import { connect, peerId } from './network'
 
 
 export function setupMenu() {
+    console.log('menu setup')
     scene('menu', menu)
 }
 

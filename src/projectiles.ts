@@ -1,4 +1,4 @@
-import type { Vec2 } from "kaplay"
+import type { Vector } from "./game"
 import { send } from "./network"
 import type { setupPlayer } from "./player"
 
@@ -8,7 +8,7 @@ export type ProjectileData = {
     type: ProjectileType
     damage: number
     sprite: string
-    pos: Vec2
+    pos: Vector
     direction: number
     speed: number
 }
@@ -23,6 +23,8 @@ export const projFunctions: Record<ProjectileType, { update: projFunction, onHit
         },
         onHit: (player, self) => {
             player.hurt(self.damage)
+            player.knockback(Vec2.fromAngle(self.direction), 50)
+            player.stun(10)
         }
     }
 }
@@ -58,7 +60,7 @@ export function shoot(data: ProjectileData, sending: boolean) {
     })
     return proj
 }
-export function createLaserCollisionParticles(position: Vec2) {
+export function createLaserCollisionParticles(position: Vector) {
     const particles = add([
         sprite('laser collide', { anim: 'expand', animSpeed: 2 }),
         pos(position),

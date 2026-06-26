@@ -1,5 +1,7 @@
+import { angleBetween } from "./game"
+import { ZLevels } from "./main"
 import { setDataListener, isHost } from "./network"
-import { MAX_STUN } from "./player"
+import { drawChargeCircle, drawRailgunAimingLine, drawStunCircle, fireRailgun, MAX_STUN, RAILGUN_CHARGE_TIME } from "./player"
 import { shoot } from "./projectiles"
 
 export function setupOtherPlayer() {
@@ -10,14 +12,15 @@ export function setupOtherPlayer() {
       anim: 'idle'
     }),
     color(),
-    // body(),
     scale(1.2),
-    z(3),
+    z(ZLevels.indexOf('players')),
     area(),
-    rotate(),
+    rotate(isHost ? 180 : 0),
     anchor("center"),
     opacity(1),
-    'solid'
+    {
+      otherPlayersPos: vec2()
+    }
   ])
 
   const HEALTHBAR_HEIGHT = 10
@@ -26,6 +29,7 @@ export function setupOtherPlayer() {
     pos(),
     rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
     color(RED),
+    z(ZLevels.indexOf('healthbar')),
     follow(player, vec2(-(player.width / 2), 30))
   ])
 
@@ -34,6 +38,7 @@ export function setupOtherPlayer() {
     pos(),
     rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
     color(GREEN),
+    z(ZLevels.indexOf('healthbar')),
     follow(player, vec2(-(player.width / 2), 30)),
     timer()
   ])
@@ -52,22 +57,24 @@ export function setupOtherPlayer() {
   })
 
   
-  let stunFrames = 0
   player.onUpdate(() => {
     if (blinking) {
       player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
     }
 
-    if (stunFrames != 0) {
-      console.log(stunFrames)
-      drawCircle({
-        pos: player.pos,
-        radius: player.width + 3,
-        color: WHITE,
-        fill: false,
-        outline:{ width: 4, color: WHITE, opacity: (stunFrames / MAX_STUN)},
-        anchor: 'center',
-      })
+    if (railgunChargeCompletion > 0) {
+      drawChargeCircle(player.pos, player.width, railgunChargeCompletion)
+    }
+
+    if (railgunChargeCompletion != 1) {
+      player.angle = angleBetween(player.pos, player.otherPlayersPos)
+    } else {
+      drawRailgunAimingLine(player.pos, player.angle, railgunChargeCompletion)
+    }
+
+    
+    if (stunFrames > 0) {
+      drawStunCircle(player.pos, player.width + 3, stunFrames)
     }
   })
 
@@ -80,10 +87,27 @@ export function setupOtherPlayer() {
     shoot(data, false)
   })
 
+  let stunFrames = 0
   setDataListener('stunFrames', ({ frames }) => {
     stunFrames = frames
-    console.log(stunFrames)
-    
+  })
+
+  let railgunChargeCompletion = 0
+  setDataListener('railgunCharge', ({ completion }) => {
+    railgunChargeCompletion = completion
+  })
+
+  setDataListener('stoppedRailgunCharge', () => {
+    railgunChargeCompletion = 0
+  })
+
+  setDataListener('aimingRailgun', ({ angle }) => {
+    player.angle = angle
+    drawRailgunAimingLine(player.pos, angle, railgunChargeCompletion)
+  })
+  
+  setDataListener('fireRailgun', () => {
+    fireRailgun(player.pos, player.angle - 180, false)
   })
 
   return player
