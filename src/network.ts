@@ -16,7 +16,7 @@ let onConnect = () => {}
 
 
 type PacketMap = {
-    all: Packet
+    all: any
     movement: Vec2
     projectileShot: ProjectileData
     death: { hostWon: boolean }
@@ -47,22 +47,8 @@ export function setDataListener<K extends keyof PacketMap>(type: K, func: Listen
 }
 
 function callListener(packet: Packet) {
-    switch (packet.type) {
-        case 'all':
-            listeners.all(packet.data)
-            break
-        case 'movement':
-            listeners.movement(packet.data)
-            break
-        case 'projectileShot':
-            listeners.projectileShot(packet.data)
-            break
-        case 'death':
-            listeners.death(packet.data)
-            break
-        case 'healthChange':
-            listeners.healthChange(packet.data)
-            break
+    for (const type in listeners) {
+        if (packet.type == type) listeners[type](packet.data)
     }
 }
 

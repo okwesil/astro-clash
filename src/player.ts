@@ -6,6 +6,7 @@ export const MAX_STUN = 40
 export function setupPlayer() {
   const SPEED = 80
   const FRICTION = 0.8
+  const KNOCKBACK_FRICTION = 0.6
   const START_POS = isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
 
   const player = add([
@@ -74,10 +75,10 @@ export function setupPlayer() {
   player.onUpdate(() => {
     if (paused) { player.vel = vec2(); return }
 
-    player.move(player.vel)
     player.vel = player.vel.add(player.knockbackVel)
+    player.move(player.vel)
     player.vel = player.vel.scale(FRICTION)
-    player.knockbackVel = player.knockbackVel.scale(FRICTION)
+    player.knockbackVel = player.knockbackVel.scale(KNOCKBACK_FRICTION)
 
 
     keepPlayerOnScreen()
@@ -95,8 +96,8 @@ export function setupPlayer() {
         outline:{ width: 4, color: WHITE, opacity: (stunFrames / MAX_STUN)},
         anchor: 'center',
       })
-      send('stunFrames', { frames: stunFrames })
       stunFrames--
+      send('stunFrames', { frames: stunFrames })
     }
 
     if (Math.abs(player.vel.x) > 0.2) {

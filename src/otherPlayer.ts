@@ -58,15 +58,16 @@ export function setupOtherPlayer() {
       player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
     }
 
-    if (stunFrames > 0) {
+    if (stunFrames != 0) {
+      console.log(stunFrames)
       drawCircle({
         pos: player.pos,
         radius: player.width + 3,
         color: WHITE,
+        fill: false,
+        outline:{ width: 4, color: WHITE, opacity: (stunFrames / MAX_STUN)},
         anchor: 'center',
-        start: 359 - stunFrames / MAX_STUN * 359,
       })
-      stunFrames--
     }
   })
 
@@ -81,6 +82,8 @@ export function setupOtherPlayer() {
 
   setDataListener('stunFrames', ({ frames }) => {
     stunFrames = frames
+    console.log(stunFrames)
+    
   })
 
   return player
