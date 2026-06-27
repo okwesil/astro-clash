@@ -74,7 +74,7 @@ export function setupOtherPlayer() {
     }
 
     if (stunFrames > 0) {
-      drawStunCircle(vec2(), player.width + 3, stunFrames)
+      drawStunCircle(vec2(), player.width, stunFrames)
     }
 
   })

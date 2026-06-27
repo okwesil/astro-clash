@@ -17,8 +17,9 @@ function menu() {
         pos(center().add(vec2(0, -60))),
         anchor('center'),
         text('generating ID', {
-            size: 20,
+            size: 50,
             width: 500,
+            font: 'pixel'
         }),
         area(),
         color(rgb(255, 37, 37)),
@@ -37,6 +38,7 @@ function menu() {
         text('type the id of the player you want to join', {
             size: 25,
             width: 500,
+            font: 'pixel'
         }),
         textInput(),
     ])

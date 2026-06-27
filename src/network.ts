@@ -9,7 +9,7 @@ function generateId() {
 const peer = new Peer(generateId(), {
     host: '192.168.1.87',
     port: 9000,
-    path: '/space-fight',
+    path: '/astro-clash',
     secure: false
 })
 

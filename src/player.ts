@@ -162,7 +162,6 @@ export function setupPlayer() {
     }
 
     if (stunFrames > 0) {
-      drawStunCircle(player.pos, player.width + 3, stunFrames)
       stunFrames--
       send('stunFrames', { frames: stunFrames })
       elapsedCharge = 0
@@ -184,6 +183,9 @@ export function setupPlayer() {
   })
 
   player.onDraw(() => {
+    if (stunFrames > 0) {
+      drawStunCircle(vec2(), player.width + 3, stunFrames)
+    }
     if (elapsedCharge > 0) {
       drawChargeCircle(vec2(), player.width + 3, elapsedCharge / RAILGUN_CHARGE_TIME)
       drawRailgunAimingLine(vec2(), 0, elapsedCharge / RAILGUN_CHARGE_TIME)

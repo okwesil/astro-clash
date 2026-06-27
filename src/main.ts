@@ -9,7 +9,6 @@ kaplay({
   height: 700,
   stretch: true,
   letterbox: true,
-  maxFPS: 60,
   crisp: true,
 })
 
@@ -23,6 +22,8 @@ export const ZLevels = [
   'laser',
   'railgun'
 ]
+
+loadFont('pixel', 'src/assets/PixelifySans-Regular.ttf')
 
 loadSprite('star','src/assets/star.png' )
 loadSprite('cress', 'src/assets/cress/cress.png', {

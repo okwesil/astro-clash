@@ -97,7 +97,7 @@ async function game() {
         const countdown = add([
             pos(center()),
             anchor('center'),
-            text(start.toString(), { size: 100 }),
+            text(start.toString(), { size: 100, font: 'pixel' }),
             opacity(1),
             animate()
         ])
@@ -113,12 +113,28 @@ async function game() {
         })
         paused = false
     }
+
+    const loseText = [
+        'You lose.',
+        ':(',
+        'You suck.',
+        'Lock in bro.',
+        'embarrasing.',
+        'just hop off',
+        '*sigh*',
+        ':(',
+        ':[',
+        '>:(',
+        ':/',
+        'x_x'
+    ]
+
     
     async function showWin(hostWon: boolean) {
         paused = true
-        const winText = hostWon == isHost ? 'You Won :)' : 'You Lost :('
+        const winText = hostWon == isHost ? 'You Won!' : loseText[randi(loseText.length)]
         const textObject = add([
-            text(winText),
+            text(winText, { size: 100, font: 'pixel' }),
             pos(center()),
             anchor('center'),
         ])
