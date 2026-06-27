@@ -6,11 +6,26 @@ function generateId() {
     return Math.floor(Math.random() * 100000).toString()
 }
 
+
+// metered.ca
 const peer = new Peer(generateId(), {
     host: '192.168.1.87',
     port: 9000,
     path: '/astro-clash',
-    secure: false
+    secure: false,
+    config: {
+        iceServers: [
+            {
+                urls: "stun:stun.relay.metered.ca:80",
+            },
+            {
+                urls: "turn:standard.relay.metered.ca:80",
+                username: "e1d9bd163975135eac0144ef",
+                credential: "BZo6UPDzxTNZ8S1C",
+            },
+        ]
+    },
+    debug: 3
 })
 
 export let peerId = new Promise<string>((resolve) => peer.on('open', (id) => {
@@ -112,17 +127,33 @@ export function send<K extends keyof PacketMap>(type: K, data: PacketMap[K]) {
 }
 
 function setupConnection(connection: DataConnection) {
-    console.log('setupConnection', connection.peer)
+    console.log('setupConnection', connection.peer, 'open?', connection.open)
     conn = connection
-    conn.on('open', () => {
+
+    let opened = false
+    const handleOpen = () => {
+        if (opened) return
+        opened = true
         console.log('connection open', connection.peer)
         onConnect()
-    })
+    }
+
+    conn.on('open', handleOpen)
+    if (conn.open) {
+        handleOpen()
+    }
+
     conn.on('data', (data: unknown) => {
         const packet = data as Packet
         callListener(packet)
     })
-    conn.on('error', (error) => console.log('connection error', error))
+    conn.on('iceStateChanged', (state) => {
+        console.log('connection iceStateChanged', connection.peer, state)
+    })
+    conn.on('error', (error) => {
+        console.log('connection error', error)
+        onError(error)
+    })
     conn.on('close', () => {
         console.log('connection closed', connection.peer)
         if (conn === connection) conn = null
@@ -131,12 +162,15 @@ function setupConnection(connection: DataConnection) {
 
 export function connect(id: string) {
     console.log('connect() called with id', id)
-    const connection = peer.connect(id)
+    const connection = peer.connect(id, {
+        reliable: true,
+        serialization: 'json'
+    })
     setupConnection(connection)
 }
 
 peer.on('connection', (c) => {
-    console.log('peer.on(connection)', c.peer)
+    console.log('peer.on(connection)', c.peer, 'open?', c.open)
     isHost = true
     setupConnection(c)
 })
