@@ -79,7 +79,6 @@ export function setupPlayer(rounds: number) {
     startPos.y = height() - startPos.y
     angle += 180
   }
-  console.log(startPos, angle)
   let elapsedCharge = 0
 
   const player = add([
@@ -217,16 +216,7 @@ export function setupPlayer(rounds: number) {
     if (stunFrames > 0) return
 
     if (elapsedCharge != 0) {
-      let currentAngle = player.angle % 360 
-      if (currentAngle < 0) currentAngle += 360
-      
-
-      if (currentAngle < 90 || currentAngle > 270) {
-        player.angle -= 1
-      } else {
-        player.angle += 1
-      }
-      
+      player.angle -= 1
       send('aimingRailgun', { angle: player.angle})
       return
     }
@@ -237,16 +227,7 @@ export function setupPlayer(rounds: number) {
     if (stunFrames > 0) return
     
     if (elapsedCharge != 0) {
-      let currentAngle = player.angle % 360 
-      if (currentAngle < 0) currentAngle += 360
-      
-
-      if (currentAngle < 90 || currentAngle > 270) {
-        player.angle += 1
-      } else {
-        player.angle -= 1
-      }
-
+      player.angle += 1
       send('aimingRailgun', { angle: player.angle })
       return
     }

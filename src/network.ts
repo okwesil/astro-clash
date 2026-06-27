@@ -25,7 +25,6 @@ const peer = new Peer(generateId(), {
             },
         ]
     },
-    debug: 3
 })
 
 export let peerId = new Promise<string>((resolve) => peer.on('open', (id) => {
@@ -46,13 +45,12 @@ type ErrorFunc = (error: PeerError<
     "socket-closed" | "unavailable-id" | "webrtc"
     >) => void
 export const setOnError = (func: ErrorFunc) => onError = func
-
 let onError: ErrorFunc = () => {}
 
 
 peer.on('error', (error) => {
     console.error('Peer error', error.cause, error.message)
-    
+    onError(error)
 })
 peer.on('disconnected', () => {
     console.log('Peer disconnected')
@@ -152,7 +150,6 @@ function setupConnection(connection: DataConnection) {
     })
     conn.on('error', (error) => {
         console.log('connection error', error)
-        onError(error)
     })
     conn.on('close', () => {
         console.log('connection closed', connection.peer)

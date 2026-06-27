@@ -26,7 +26,10 @@ export const ZLevels = [
   'win text'
 ]
 
-loadFont('pixel', 'src/assets/Tiny5-Regular.ttf')
+loadFont('pixel', 'src/assets/Minecraft.ttf')
+
+loadSprite('crown', 'src/assets/red-crown.png')
+loadSprite('crown blue', 'src/assets/blue-crown.png')
 
 loadSprite('star','src/assets/star.png' )
 loadSprite('cress', 'src/assets/cress/cress.png', {
@@ -118,7 +121,6 @@ loadSprite('boom', 'src/assets/cress/boom.png', {
 })
 
 // setupPlayer()
-setOnConnect(() => go('game'))
 setupMenu()
 setupGame()
 go('menu')

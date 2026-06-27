@@ -8,7 +8,7 @@ function createStar() {
         offscreen({ destroy: true }),
         z(ZLevels.indexOf('stars')),
         {
-            direction: rand(vec2(-1), vec2(1)).scale(3)
+            direction: rand(vec2(-1), vec2(1)).scale(10)
         },
         'star'
     ])
@@ -24,7 +24,7 @@ export function setupBackground() {
 
     onUpdate('star', (star) => {
         star.move(star.direction)
-        if (Date.now() - lastDeletionTime > 1000) {
+        if (Date.now() - lastDeletionTime > 250) {
             star.destroy()    
             createStar()
             lastDeletionTime = Date.now()

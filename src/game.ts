@@ -19,7 +19,8 @@ export function angleBetween(p1: Vector, p2: Vector): number {
 function boom(position: Vector) {
     add([
         sprite('boom', {
-            anim: 'expand'
+            anim: 'expand',
+            animSpeed: 2
         }),
         scale(3),
         pos(position),
@@ -28,11 +29,44 @@ function boom(position: Vector) {
 }
 
 
+
 let rounds = 1
+const score = {
+    host: 0,
+    other: 0,
+}
 async function game() {
     setupBackground()
     const player = setupPlayer(rounds)
     const otherPlayer = setupOtherPlayer(rounds)
+
+    const playerScore = isHost ? score.host : score.other
+    const otherPlayerScore = isHost ? score.other : score.host
+    //scoreboard
+    add([
+        text(`[red]${playerScore}[/red]:[blue]${otherPlayerScore}[/blue]`, { styles: {
+            red: {
+                color: RED
+            },
+            blue: {
+                color: BLUE
+            }
+        }}),
+        pos(vec2(width() / 2, 20)),
+        anchor('top')
+    ])
+
+    if (playerScore != otherPlayerScore) {
+        const currentPlayerIsWinning = playerScore > otherPlayerScore
+        const crown = add([
+            sprite('crown' + (!currentPlayerIsWinning ? ' blue' : '')),
+            pos(),
+            follow(currentPlayerIsWinning ? player : otherPlayer, vec2(0, -(player.height / 2))),
+            anchor('bot'),
+            scale(3),
+        ])
+        wait(3, () => crown.destroy())
+    }
 
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore
@@ -61,10 +95,14 @@ async function game() {
         boom(player.pos)
         player.destroy()
         send('death', { hostWon: !isHost, roundDied: rounds })
+        if (isHost) score.other++
+        else score.host++
         showWin(!isHost)
     })
     setDataListener('death', ({ hostWon, roundDied }) => {
         if (!paused) {
+            if (isHost) score.host++
+            else score.other++
             boom(otherPlayer.pos)
             otherPlayer.destroy()
             rounds = roundDied

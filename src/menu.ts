@@ -1,7 +1,7 @@
 import { setupBackground } from './background'
 import { ZLevels } from './main'
 import './network'
-import { connect, peerId } from './network'
+import { connect, peerId, setOnConnect, setOnError } from './network'
 
 
 export function setupMenu() {
@@ -12,13 +12,14 @@ export function setupMenu() {
 function menu() {
     setBackground(BLACK)
     setupBackground()
+    setOnConnect(() => go('game'))
     
 
     const idText = add([
         pos(center().add(vec2(0, -60))),
         anchor('center'),
         text('generating ID', {
-            size: 50,
+            size: 60,
             width: 500,
             font: 'pixel'
         }),
@@ -46,23 +47,51 @@ function menu() {
         pos(center()),
         anchor('center'),
         text('type the id of the player you want to join', {
-            size: 25,
+            size: 30,
             width: 500,
             font: 'pixel'
         }),
         textInput(),
+        color(WHITE),
         z(ZLevels.indexOf('menu text'))
+    ])
+    
+
+    setOnError((error) => {
+        loading = false
+        loadingText.text = error.message
+    })
+    let loading = false
+    const loadingText = add([
+        pos(vec2(width() / 2, height() / 2 + 50)),
+        anchor('center'),
+        text('connecting...', {
+            size: 30,
+            width: 500,
+            font: 'pixel'
+        }),
+        color(RED),
+        z(ZLevels.indexOf('menu text')),
+        opacity(0),
     ])
 
     onUpdate(async () => {
         if (isKeyDown('control') && isKeyDown('v')) {
             input.text = await navigator.clipboard.readText()
         }
+
+        if (loading) {
+            loadingText.opacity = 1   
+            input.hasFocus = false
+        } else {
+            input.hasFocus = true
+        }
     })
 
     input.onKeyPress('enter', () => {
         if (input.text.length > 2) {
             connect(input.text)
+            loading = true
         }
     })
 
