@@ -1,13 +1,19 @@
 import { angleBetween } from "./game"
 import { ZLevels } from "./main"
 import { setDataListener, isHost } from "./network"
-import { drawChargeCircle, drawRailgunAimingLine, drawStunCircle, fireRailgun, MAX_STUN, RAILGUN_CHARGE_TIME } from "./player"
+import { drawChargeCircle, drawRailgunAimingLine, drawStunCircle, fireRailgun } from "./player"
 import { shoot } from "./projectiles"
 
-export function setupOtherPlayer() {
-  const START_POS = !isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
+export function setupOtherPlayer(rounds: number) {
+  
+  let startPos = !isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
+  let angle = isHost ? 180 : 0
+  if (rounds % 2 == 0) {
+    startPos.y = height() - startPos.y
+    angle += 180
+  }
   const player = add([
-    pos(START_POS),
+    pos(startPos),
     sprite('cress blue', {
       anim: 'idle'
     }),
@@ -15,7 +21,7 @@ export function setupOtherPlayer() {
     scale(1.2),
     z(ZLevels.indexOf('other player')),
     area(),
-    rotate(isHost ? 180 : 0),
+    rotate(angle),
     anchor("center"),
     opacity(1),
     {

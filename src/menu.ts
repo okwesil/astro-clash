@@ -1,4 +1,5 @@
 import { setupBackground } from './background'
+import { ZLevels } from './main'
 import './network'
 import { connect, peerId } from './network'
 
@@ -31,7 +32,16 @@ function menu() {
         idText.color = rgb(255, 255, 255)
         _peerId = id
     })
+    
 
+    // input background so stars does mess it up
+    add([
+        rect(500, 40),
+        anchor('center'),
+        pos(center()),
+        color(BLACK),
+        z(ZLevels.indexOf('menu text background'))
+    ])
     const input = add([
         pos(center()),
         anchor('center'),
@@ -41,6 +51,7 @@ function menu() {
             font: 'pixel'
         }),
         textInput(),
+        z(ZLevels.indexOf('menu text'))
     ])
 
     onUpdate(async () => {

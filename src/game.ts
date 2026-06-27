@@ -3,6 +3,7 @@ import { setupPlayer } from "./player"
 import { setupBackground } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
 import { setDataListener, isHost, send } from "./network"
+import { ZLevels } from "./main"
 
 export let paused = false
 export function setupGame() {
@@ -26,10 +27,12 @@ function boom(position: Vector) {
     ])
 }
 
+
+let rounds = 1
 async function game() {
     setupBackground()
-    const player = setupPlayer()
-    const otherPlayer = setupOtherPlayer()
+    const player = setupPlayer(rounds)
+    const otherPlayer = setupOtherPlayer(rounds)
 
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore
@@ -55,15 +58,16 @@ async function game() {
     })
 
     player.onDeath(() => {
-        showWin(!isHost)
         boom(player.pos)
         player.destroy()
-        send('death', { hostWon: !isHost })
+        send('death', { hostWon: !isHost, roundDied: rounds })
+        showWin(!isHost)
     })
-    setDataListener('death', ({ hostWon }) => {
+    setDataListener('death', ({ hostWon, roundDied }) => {
         if (!paused) {
             boom(otherPlayer.pos)
             otherPlayer.destroy()
+            rounds = roundDied
             showWin(hostWon)
         }
     })
@@ -85,6 +89,8 @@ async function game() {
             send('ping', null) 
         } else {
             debug.log(`${performance.now() - timePingWasSent}ms`)
+            debug.log(`are you 'host': ${isHost ? 'yes' : 'no'}`)
+            debug.log(`round ${rounds}`)
             sentPing = false
         }
     })
@@ -114,29 +120,33 @@ async function game() {
         paused = false
     }
 
-    const loseText = [
-        'You lose.',
-        ':(',
-        'You suck.',
-        'Lock in bro.',
-        'embarrasing.',
-        'just hop off',
-        '*sigh*',
-        ':(',
-        ':[',
-        '>:(',
-        ':/',
-        'x_x'
-    ]
+    
 
     
     async function showWin(hostWon: boolean) {
+        const loseText = [
+            'You lose.',
+            ':(',
+            'You suck.',
+            'Lock in bro.',
+            'embarrasing.',
+            'just hop off',
+            '*sigh*',
+            ':(',
+            ':[',
+            '>:(',
+            ':/',
+            'x_x'
+        ]
+
         paused = true
+        rounds++
         const winText = hostWon == isHost ? 'You Won!' : loseText[randi(loseText.length)]
         const textObject = add([
             text(winText, { size: 100, font: 'pixel' }),
             pos(center()),
             anchor('center'),
+            z(ZLevels.indexOf('win text'))
         ])
         wait(1, async () => {
             textObject.destroy()

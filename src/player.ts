@@ -69,22 +69,28 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
   shake(50)
 }
 
-export function setupPlayer() {
+export function setupPlayer(rounds: number) {
   const SPEED = 80
   const FRICTION = 0.8
   const KNOCKBACK_FRICTION = 0.6
-  const START_POS = isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
+  let startPos = isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
+  let angle = isHost ? 180 : 0
+  if (rounds % 2 == 0) {
+    startPos.y = height() - startPos.y
+    angle += 180
+  }
+  console.log(startPos, angle)
   let elapsedCharge = 0
 
   const player = add([
     health(100, 100),
-    pos(START_POS),
+    pos(startPos),
     sprite('cress', {
       anim: 'idle'
     }),
     color(),
     area(),
-    rotate(isHost ? 180 : 0),
+    rotate(angle),
     scale(1.2),
     z(ZLevels.indexOf('current player')),
     anchor("center"),
@@ -93,6 +99,7 @@ export function setupPlayer() {
     {
       vel: vec2(),
       knockbackVel: vec2(),
+      angleX: 0,
       stun: (duration: number) => {
         stunFrames = Math.min(duration, MAX_STUN)
       },
@@ -192,35 +199,59 @@ export function setupPlayer() {
     }
   })
 
+
+  const movePlayer = (direction: Vector) => {
+    let speed = shooting ? SPEED * 0.8 : SPEED
+    player.vel = player.vel.add(direction.scale(speed))
+  }
+
   onKeyDown(['w', 'up'], () => {
     if (stunFrames > 0 || elapsedCharge != 0) return
-    player.vel = player.vel.add(vec2(0, -SPEED))
+    movePlayer(vec2(0, -1))
   })
   onKeyDown(['s', 'down'], () => {
     if (stunFrames > 0 || elapsedCharge != 0) return
-    player.vel = player.vel.add(vec2(0, SPEED))
+    movePlayer(vec2(0, 1))
   })
   onKeyDown(['a', 'left'], () => {
     if (stunFrames > 0) return
 
     if (elapsedCharge != 0) {
-      player.angle -= 1
+      let currentAngle = player.angle % 360 
+      if (currentAngle < 0) currentAngle += 360
+      
+
+      if (currentAngle < 90 || currentAngle > 270) {
+        player.angle -= 1
+      } else {
+        player.angle += 1
+      }
+      
       send('aimingRailgun', { angle: player.angle})
       return
     }
 
-    player.vel = player.vel.add(vec2(-SPEED, 0))
+    movePlayer(vec2(-1, 0))
   })
   onKeyDown(['d', 'right'], () => {
     if (stunFrames > 0) return
     
     if (elapsedCharge != 0) {
-      player.angle += 1
-      send('aimingRailgun', { angle: player.angle})
+      let currentAngle = player.angle % 360 
+      if (currentAngle < 0) currentAngle += 360
+      
+
+      if (currentAngle < 90 || currentAngle > 270) {
+        player.angle += 1
+      } else {
+        player.angle -= 1
+      }
+
+      send('aimingRailgun', { angle: player.angle })
       return
     }
 
-    player.vel = player.vel.add(vec2(SPEED, 0))
+    movePlayer(vec2(1, 0))
   })
 
   let alreadySentFullCompletion = false
@@ -254,7 +285,9 @@ export function setupPlayer() {
   let lastShotTime = 0
   let shootOnLeftSide = false
   const CENTER_OFFSET = 22
+  let shooting = false
   onKeyDown(['z'], () => {
+    shooting = true
     if (!paused && stunFrames == 0 && !player.charged() && Date.now() - lastShotTime > SHOT_COOLDOWN) {
 
       const data: ProjectileData = { 
@@ -270,6 +303,10 @@ export function setupPlayer() {
       shootOnLeftSide = !shootOnLeftSide
       lastShotTime = Date.now()
     }
+  })
+
+  onKeyRelease(['z'], () => {
+    shooting = false
   })
 
   return player

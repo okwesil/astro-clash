@@ -1,4 +1,4 @@
-import { Peer, type DataConnection } from 'peerjs'
+import { Peer, PeerError, type DataConnection } from 'peerjs'
 import type { Vec2 } from 'kaplay'
 import type { ProjectileData } from './projectiles'
 
@@ -23,8 +23,21 @@ let conn: DataConnection | null = null
 export const setOnConnect = (func: () => void) => onConnect = func 
 let onConnect = () => {}
 
+type ErrorFunc = (error: PeerError<
+    "disconnected" 
+    | "browser-incompatible" | "invalid-id" |
+    "invalid-key" | "network" | "peer-unavailable" |
+    "ssl-unavailable" | "server-error" | "socket-error" |
+    "socket-closed" | "unavailable-id" | "webrtc"
+    >) => void
+export const setOnError = (func: ErrorFunc) => onError = func
+
+let onError: ErrorFunc = () => {}
+
+
 peer.on('error', (error) => {
-    console.log('Peer error', error)
+    console.error('Peer error', error.cause, error.message)
+    
 })
 peer.on('disconnected', () => {
     console.log('Peer disconnected')
@@ -38,7 +51,7 @@ type PacketMap = {
     all: any
     movement: Vec2
     projectileShot: ProjectileData
-    death: { hostWon: boolean }
+    death: { hostWon: boolean; roundDied: number }
     healthChange: { maxHP: number, currentValue: number }
     stunFrames: { frames: number }
     railgunCharge: { completion: number }

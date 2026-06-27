@@ -16,14 +16,17 @@ console.log('main.ts loaded', window.location.href)
 
 export const ZLevels = [
   'stars',
+  'menu text background',
+  'menu text',
   'healthbar',
   'other player',
   'current player',
   'laser',
-  'railgun'
+  'railgun',
+  'win text'
 ]
 
-loadFont('pixel', 'src/assets/PixelifySans-Regular.ttf')
+loadFont('pixel', 'src/assets/Tiny5-Regular.ttf')
 
 loadSprite('star','src/assets/star.png' )
 loadSprite('cress', 'src/assets/cress/cress.png', {
