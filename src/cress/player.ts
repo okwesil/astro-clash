@@ -238,7 +238,6 @@ export default function setupCress(rounds: number) {
     let alreadyPlaying = false
     onKeyDown(['x'], () => {
         if (paused) return
-        console.log(firstFrameOfCharge, alreadyPlaying)
         elapsedCharge += dt()
         if (player.charged()) elapsedCharge = RAILGUN_CHARGE_TIME
         

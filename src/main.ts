@@ -2,6 +2,7 @@ import kaplay from "kaplay"
 import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
+import { setConnectionListener } from "./network"
 
 kaplay({
   width: 700,
@@ -11,6 +12,7 @@ kaplay({
   crisp: true,
 })
 
+setConnectionListener('close', () => go('menu'))
 console.log('main.ts loaded', window.location.href)
 
 export const ZLevels = [

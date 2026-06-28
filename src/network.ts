@@ -34,9 +34,15 @@ export let peerId = new Promise<string>((resolve) => peer.on('open', (id) => {
 export let isHost = false
 let conn: DataConnection | null = null 
  
-export const setOnConnect = (func: () => void) => onConnect = func 
-let onConnect = () => {}
+type ConnectionEvents = 'open' | 'close' 
+const connectionListeners: Record<ConnectionEvents, (() => void)> = {
+    open: () => {},
+    close: () => {},
+}
 
+export function setConnectionListener(type: ConnectionEvents, func: () => void) {
+    connectionListeners[type] = func
+}
 type ErrorFunc = (error: PeerError<
     "disconnected" 
     | "browser-incompatible" | "invalid-id" |
@@ -150,18 +156,10 @@ function setupConnection(connection: DataConnection) {
     console.log('setupConnection', connection.peer, 'open?', connection.open)
     conn = connection
 
-    let opened = false
-    const handleOpen = () => {
-        if (opened) return
-        opened = true
+    conn.on('open', () => {
         console.log('connection open', connection.peer)
-        onConnect()
-    }
-
-    conn.on('open', handleOpen)
-    if (conn.open) {
-        handleOpen()
-    }
+        connectionListeners.open()
+    })
 
     conn.on('data', (data: unknown) => {
         const packet = data as Packet
@@ -169,12 +167,16 @@ function setupConnection(connection: DataConnection) {
     })
     conn.on('iceStateChanged', (state) => {
         console.log('connection iceStateChanged', connection.peer, state)
+        if (state == 'disconnected') {
+            connectionListeners.close()
+        }
     })
     conn.on('error', (error) => {
         console.log('connection error', error)
     })
     conn.on('close', () => {
         console.log('connection closed', connection.peer)
+        connectionListeners.close()
         if (conn === connection) conn = null
     })
 }

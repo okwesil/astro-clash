@@ -2,7 +2,7 @@ import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
 import { setupBackground } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
-import { setDataListener, isHost, send, waitForPacket } from "./network"
+import { setDataListener, isHost, send } from "./network"
 import { ZLevels } from "./main"
 
 export let paused = false
@@ -35,7 +35,12 @@ const score = {
     host: 0,
     other: 0,
 }
-async function game() {
+async function game(reset: boolean) {
+    if (reset) {
+        rounds = 1
+        score.host = 0
+        score.other = 0
+    }
     setupBackground()
     const player = setupPlayer(rounds)
     const otherPlayer = setupOtherPlayer(rounds)
@@ -44,14 +49,17 @@ async function game() {
     const otherPlayerScore = isHost ? score.other : score.host
     //scoreboard
     add([
-        text(`[red]${playerScore}[/red]:[blue]${otherPlayerScore}[/blue]`, { styles: {
-            red: {
-                color: RED
-            },
-            blue: {
-                color: BLUE
+        text(`[red]${playerScore}[/red]:[blue]${otherPlayerScore}[/blue]`, { 
+            font: 'pixel',
+            styles: {
+                red: {
+                    color: RED
+                },
+                blue: {
+                    color: BLUE
+                }
             }
-        }}),
+        }),
         pos(vec2(width() / 2, 20)),
         anchor('top')
     ])
@@ -189,7 +197,7 @@ async function game() {
         ])
         wait(1, async () => {
             textObject.destroy()
-            go('game')
+            go('game', false)
         })
         
     }

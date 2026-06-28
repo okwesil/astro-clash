@@ -1,7 +1,7 @@
 import { setupBackground } from './background'
 import { ZLevels } from './main'
 import './network'
-import { connect, peerId, setOnConnect, setOnError } from './network'
+import { connect, peerId, setConnectionListener, setOnError } from './network'
 
 
 export function setupMenu() {
@@ -12,7 +12,7 @@ export function setupMenu() {
 function menu() {
     setBackground(BLACK)
     setupBackground()
-    setOnConnect(() => go('game'))
+    setConnectionListener('open', () => go('game', true))
     
 
     const idText = add([
@@ -96,9 +96,9 @@ function menu() {
     })
 
     
-    onKeyPress('p', () => {
-        go('game')
-    })
+    // onKeyPress('p', () => {
+    //     go('game')
+    // })
 
     idText.onClick(() => {
         if (_peerId) {
