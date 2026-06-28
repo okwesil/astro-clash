@@ -31,16 +31,16 @@ export const projFunctions: Record<ProjectileType, { update: projFunction, onHit
 
 export type ProjectileObject = ReturnType<typeof shoot>
 
-export function shoot(data: ProjectileData, sending: boolean) {
+export function shoot(data: ProjectileData, sendToOtherPlayer: boolean) {
     const proj = add([
-        sprite(data.sprite + (!sending ? ' blue' : '' )),
+        sprite(data.sprite + (!sendToOtherPlayer ? ' blue' : '' )),
         pos(data.pos.x, data.pos.y),
         area(),
         rotate(data.direction),
         anchor('center'),
         offscreen({ destroy: true }),
         scale(1.5),
-        (!sending ? 'enemy projectile' : 'friendly projectile'),
+        (!sendToOtherPlayer ? 'enemy projectile' : 'friendly projectile'),
         'projectile',
         {
             type: data.type,
@@ -51,7 +51,7 @@ export function shoot(data: ProjectileData, sending: boolean) {
     ])
 
     
-    if (sending) {
+    if (sendToOtherPlayer) {
         send('projectileShot', data)
     }
 
