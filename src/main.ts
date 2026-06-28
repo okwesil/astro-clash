@@ -12,7 +12,7 @@ kaplay({
   crisp: true,
 })
 
-setConnectionListener('close', () => go('menu'))
+setConnectionListener('close', (reason) => go('menu', reason))
 console.log('main.ts loaded', window.location.href)
 
 export const ZLevels = [

@@ -9,7 +9,7 @@ export function setupMenu() {
     scene('menu', menu)
 }
 
-function menu() {
+function menu(reason: string | undefined) {
     setBackground(BLACK)
     setupBackground()
     setConnectionListener('open', () => go('game', true))
@@ -58,21 +58,21 @@ function menu() {
     
 
     setOnError((error) => {
-        loading = false
-        loadingText.text = error.message
+        connecting = false
+        connectingText.text = error.message
     })
-    let loading = false
-    const loadingText = add([
+    let connecting = false
+    const connectingText = add([
         pos(vec2(width() / 2, height() / 2 + 50)),
         anchor('center'),
-        text('connecting...', {
+        text(reason ? reason :  'connecting...', {
             size: 30,
             width: 500,
             font: 'pixel'
         }),
         color(RED),
         z(ZLevels.indexOf('menu text')),
-        opacity(0),
+        opacity(reason ? 1 : 0),
     ])
 
     onUpdate(async () => {
@@ -80,8 +80,9 @@ function menu() {
             input.text = await navigator.clipboard.readText()
         }
 
-        if (loading) {
-            loadingText.opacity = 1   
+        if (connecting) {
+            connectingText.opacity = 1   
+            connectingText.text = 'connecting...'
             input.hasFocus = false
         } else {
             input.hasFocus = true
@@ -89,9 +90,9 @@ function menu() {
     })
 
     input.onKeyPress('enter', () => {
-        if (input.text.length > 2) {
+        if (input.text.length > 2 && !connecting) {
             connect(input.text)
-            loading = true
+            connecting = true
         }
     })
 

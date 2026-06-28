@@ -31,15 +31,21 @@ function boom(position: Vector) {
 
 
 let rounds = 1
-const score = {
+let score = {
     host: 0,
     other: 0,
 }
 
-// TODO: Add a timer here and make it so that the user has a grace period and if the connect back on time, then their client will ask the other for score and stuff
+let disconnectTimer: number | null = null
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        closeConnection()
+        disconnectTimer = setTimeout(() => {
+            send('reasonForDisconnect', { reason: 'Other player stayed idle too long' })
+            closeConnection('You were idle for 2 long')
+        }, 6000)
+    } else if (disconnectTimer != null) {
+        clearTimeout(disconnectTimer)
+        send('getCurrentState', null)
     }
 })
 
@@ -49,6 +55,19 @@ async function game(reset: boolean) {
         score.host = 0
         score.other = 0
     }
+
+    // setDataListener('getCurrentState', () => {
+    //     send('currentState', { score, rounds })
+    // })
+
+    // setDataListener('currentState', ({ score: _score, rounds: _rounds }) => {
+    //     score = _score 
+    //     scoreboard.text = `[red]${isHost ? score.host : score.other}[/red]:[blue]${isHost ? score.other : score.host}[/blue]`
+    //     rounds = _rounds 
+    // })
+
+    setDataListener('reasonForDisconnect', ({ reason }) => closeConnection( reason ))
+
     setupBackground()
     const player = setupPlayer(rounds)
     const otherPlayer = setupOtherPlayer(rounds)
@@ -56,7 +75,7 @@ async function game(reset: boolean) {
     const playerScore = isHost ? score.host : score.other
     const otherPlayerScore = isHost ? score.other : score.host
     //scoreboard
-    add([
+    const scoreboard = add([
         text(`[red]${playerScore}[/red]:[blue]${otherPlayerScore}[/blue]`, { 
             font: 'pixel',
             styles: {
@@ -107,7 +126,9 @@ async function game(reset: boolean) {
         b.destroy()
     })
 
+    // TODO: fix bug where if both players death at the same time, both get credited a loss
     player.onDeath(() => {
+        paused = true
         boom(player.pos)
         player.destroy()
         send('death', { hostWon: !isHost, roundDied: rounds })
@@ -117,6 +138,7 @@ async function game(reset: boolean) {
     })
     setDataListener('death', ({ hostWon, roundDied }) => {
         if (!paused) {
+            paused = true
             if (isHost) score.host++
             else score.other++
             boom(otherPlayer.pos)
@@ -179,6 +201,7 @@ async function game(reset: boolean) {
 
     
     async function showWin(hostWon: boolean) {
+        paused = true
         const loseText = [
             'You lose.',
             ':(',
@@ -194,9 +217,8 @@ async function game(reset: boolean) {
             'x_x'
         ]
 
-        paused = true
         rounds++
-        const winText = hostWon == isHost ? 'You Won!' : loseText[randi(loseText.length)]
+        const winText = hostWon == isHost ? 'You Win!' : loseText[randi(loseText.length)]
         const textObject = add([
             text(winText, { size: 100, font: 'pixel' }),
             pos(center()),

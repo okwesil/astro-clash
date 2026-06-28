@@ -8,8 +8,8 @@ function generateId() {
 
 
 // metered.ca
-const peer = new Peer(generateId(), {
-    host: 'astro-clash-peerjs-server-796645945227.us-west2.run.app',
+const PEER_CONFIG = {
+host: 'astro-clash-peerjs-server-796645945227.us-west2.run.app',
     port: 443,
     path: '/',
     secure: true,
@@ -25,7 +25,8 @@ const peer = new Peer(generateId(), {
             },
         ]
     },
-})
+}
+let peer = new Peer(generateId(), PEER_CONFIG)
 
 export let peerId = new Promise<string>((resolve) => peer.on('open', (id) => {
     console.log('Peer open', id)
@@ -34,13 +35,24 @@ export let peerId = new Promise<string>((resolve) => peer.on('open', (id) => {
 export let isHost = false
 let conn: DataConnection | null = null 
  
-type ConnectionEvents = 'open' | 'close' 
-const connectionListeners: Record<ConnectionEvents, (() => void)> = {
+type ConnEventMap = {
+    open: null,
+    // reason for closure
+    close: string
+}
+
+type ConnEventListener<T> = (data: T) => void
+
+type ConnEventListenerMap = {
+    [K in keyof ConnEventMap]: ConnEventListener<ConnEventMap[K]>
+}
+
+const connectionListeners: ConnEventListenerMap = {
     open: () => {},
     close: () => {},
 }
 
-export function setConnectionListener(type: ConnectionEvents, func: () => void) {
+export function setConnectionListener<K extends keyof ConnEventMap>(type: K, func: ConnEventListenerMap[K]) {
     connectionListeners[type] = func
 }
 type ErrorFunc = (error: PeerError<
@@ -59,11 +71,12 @@ peer.on('error', (error) => {
     onError(error)
 })
 peer.on('disconnected', () => {
-    connectionListeners.close()
+    connectionListeners.close('Peer disconnected, try refreshing')
+    peer.reconnect()
     console.log('Peer disconnected')
 })
 peer.on('close', () => {
-    connectionListeners.close()
+    connectionListeners.close('Peer closed, try refreshing')
     console.log('Peer closed')
 })
 
@@ -80,6 +93,9 @@ type PacketMap = {
     aimingRailgun: { angle: number }
     fireRailgun: null 
     endOfCooldown: { sentByHost: boolean }
+    getCurrentState: null
+    currentState: { score: { host: number, other: number }, rounds: number }
+    reasonForDisconnect: { reason: string }
 }
 
 type Packet =
@@ -103,7 +119,10 @@ export const listeners: ListenerMap = {
     stoppedRailgunCharge: () => {},
     aimingRailgun: () => {},
     fireRailgun: () => {},
-    endOfCooldown: () => {}
+    endOfCooldown: () => {},
+    getCurrentState: () => {},
+    currentState: () => {},
+    reasonForDisconnect: () => {}
 }
 
 const listenersForAllPackets: Record<string, Listener<Packet>> = {}
@@ -122,7 +141,8 @@ export function setDataListener<K extends keyof PacketMap>(type: K | 'all', func
 
 export function waitForPacket<K extends keyof PacketMap>(type: K): Promise<Packet> {
     return new Promise(resolve => {
-        setDataListener('all', (packet: Packet) => {
+        const id = setDataListener('all', (packet: Packet) => {
+            if (id) delete listenersForAllPackets[id]
             if (packet.type == type) resolve(packet)
         })
     })
@@ -130,6 +150,7 @@ export function waitForPacket<K extends keyof PacketMap>(type: K): Promise<Packe
 
 function callListener(packet: Packet) {
     // console.log('inbound packet', packet)
+    
     for (const id in listenersForAllPackets) {
         listenersForAllPackets[id](packet)
     }
@@ -160,7 +181,7 @@ function setupConnection(connection: DataConnection) {
 
     conn.on('open', () => {
         console.log('connection open', connection.peer)
-        connectionListeners.open()
+        connectionListeners.open(null)
     })
 
     conn.on('data', (data: unknown) => {
@@ -170,7 +191,7 @@ function setupConnection(connection: DataConnection) {
     conn.on('iceStateChanged', (state) => {
         console.log('connection iceStateChanged', connection.peer, state)
         if (state == 'disconnected') {
-            connectionListeners.close()
+            connectionListeners.close('ice state changed, try refreshing')
         }
     })
     conn.on('error', (error) => {
@@ -178,7 +199,9 @@ function setupConnection(connection: DataConnection) {
     })
     conn.on('close', () => {
         console.log('connection closed', connection.peer)
-        connectionListeners.close()
+        let reasoning = reasonForClosure != null ? reasonForClosure : 'connection closed, try refreshing'
+        connectionListeners.close(reasoning)
+        reasonForClosure = null
         if (conn === connection) conn = null
     })
 }
@@ -198,4 +221,8 @@ peer.on('connection', (c) => {
     setupConnection(c)
 })
 
-export const closeConnection = () => conn?.close()
+export const closeConnection = (reason: string) => {
+    reasonForClosure = reason
+    conn?.close()
+}
+export let reasonForClosure: string | null = null
