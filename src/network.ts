@@ -61,7 +61,7 @@ peer.on('close', () => {
 
 type PacketMap = {
     ping: null
-    all: any
+    all: Packet
     movement: Vec2
     projectileShot: ProjectileData
     death: { hostWon: boolean; roundDied: number }
@@ -71,6 +71,7 @@ type PacketMap = {
     stoppedRailgunCharge: null
     aimingRailgun: { angle: number }
     fireRailgun: null 
+    endOfCooldown: { sentByHost: boolean }
 }
 
 type Packet =
@@ -83,8 +84,8 @@ type ListenerMap = {
 }
 
 export const listeners: ListenerMap = {
-    ping: () => {},
     all: () => {},
+    ping: () => {},
     movement: () => {},
     projectileShot: () => {},
     death: () => {},
@@ -93,18 +94,39 @@ export const listeners: ListenerMap = {
     railgunCharge: () => {},
     stoppedRailgunCharge: () => {},
     aimingRailgun: () => {},
-    fireRailgun: () => {}
+    fireRailgun: () => {},
+    endOfCooldown: () => {}
 }
 
-export function setDataListener<K extends keyof PacketMap>(type: K, func: ListenerMap[K]): void {
+const listenersForAllPackets: Record<string, Listener<Packet>> = {}
+export function setDataListener<K extends keyof PacketMap>(type: K | 'all', func: ListenerMap[K]): string | undefined {
+    if (type == 'all') {
+        let id = rand(10000).toString()
+        while (Object.keys(listenersForAllPackets).includes(id)) {
+            id = rand(10000).toString()
+        }
+        listenersForAllPackets[id] = func as unknown as Listener<Packet>
+        return id
+    }
     listeners[type] = func
+}
+
+
+export function waitForPacket<K extends keyof PacketMap>(type: K): Promise<Packet> {
+    return new Promise(resolve => {
+        setDataListener('all', (packet: Packet) => {
+            if (packet.type == type) resolve(packet)
+        })
+    })
 }
 
 function callListener(packet: Packet) {
     // console.log('inbound packet', packet)
-    listeners.all(packet)
+    for (const id in listenersForAllPackets) {
+        listenersForAllPackets[id](packet)
+    }
     for (const type of Object.keys(listeners) as Array<keyof PacketMap>) {
-        if (type !== 'all' && packet.type === type) {
+        if (packet.type === type) {
             const listener = listeners[type] as (data: unknown) => void
             listener(packet.data)
         }

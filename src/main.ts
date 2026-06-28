@@ -2,7 +2,6 @@ import kaplay from "kaplay"
 import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
-import { setOnConnect } from "./network"
 
 kaplay({
   width: 700,
@@ -27,11 +26,15 @@ export const ZLevels = [
 ]
 
 loadFont('pixel', 'src/assets/Minecraft.ttf')
+loadSprite('star','src/assets/star.png' )
 
 loadSprite('crown', 'src/assets/red-crown.png')
 loadSprite('crown blue', 'src/assets/blue-crown.png')
 
-loadSprite('star','src/assets/star.png' )
+loadSound('laser sound', 'src/assets/cress/laser-sfx.mp3')
+loadSound('railgun charging', 'src/assets/cress/railgun-charging.mp3')
+loadSound('railgun firing', 'src/assets/cress/railgun-fire.mp3')
+
 loadSprite('cress', 'src/assets/cress/cress.png', {
   sliceX: 4,
   sliceY: 2,
@@ -47,7 +50,6 @@ loadSprite('cress', 'src/assets/cress/cress.png', {
     }
   }
 })
-
 
 loadSprite('cress blue', 'src/assets/cress/cress-blue.png', {
   sliceX: 4,
@@ -109,7 +111,7 @@ loadSprite('railgun blue', 'src/assets/cress/railgun-laser-blue.png', {
   }
 })
 
-loadSprite('boom', 'src/assets/cress/boom.png', {
+loadSprite('boom', 'src/assets/boom.png', {
   sliceX: 7,
   sliceY: 1,
   anims: {

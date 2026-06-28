@@ -11,6 +11,7 @@ export type ProjectileData = {
     pos: Vector
     direction: number
     speed: number
+    sound: string
 }
 
 type projFunction = (self: ProjectileObject) => void
@@ -50,6 +51,9 @@ export function shoot(data: ProjectileData, sendToOtherPlayer: boolean) {
         }
     ])
 
+    play(data.sound, {
+        volume: 0.1
+    })
     
     if (sendToOtherPlayer) {
         send('projectileShot', data)

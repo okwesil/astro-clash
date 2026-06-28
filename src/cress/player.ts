@@ -1,3 +1,4 @@
+import type { AudioPlay } from "kaplay"
 import { angleBetween, paused, type Vector } from "../game"
 import { ZLevels } from "../main"
 import { isHost, send } from "../network"
@@ -42,6 +43,10 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
     (red ? 'friendly railgun' : 'enemy railgun')
   ])
 
+  play('railgun firing', {
+    volume: 0.2
+  })
+
   // after a short interval deactivate hitbox
   wait(0.1, () => {
     railgun.collisionIgnore = ['*']
@@ -84,6 +89,7 @@ export default function setupCress(rounds: number) {
     anchor("center"),
     opacity(1),
     'current player',
+    'cress',
     {
         vel: vec2(),
         knockbackVel: vec2(),
@@ -225,30 +231,48 @@ export default function setupCress(rounds: number) {
     })
 
     let alreadySentFullCompletion = false
+    let railgunAudio: AudioPlay = play('railgun charging', {
+        volume: 0
+    })
+    let firstFrameOfCharge = true
+    let alreadyPlaying = false
     onKeyDown(['x'], () => {
-    if (paused) return
-    elapsedCharge += dt()
-    if (player.charged()) elapsedCharge = RAILGUN_CHARGE_TIME
+        if (paused) return
+        console.log(firstFrameOfCharge, alreadyPlaying)
+        elapsedCharge += dt()
+        if (player.charged()) elapsedCharge = RAILGUN_CHARGE_TIME
+        
+        if (!player.charged()) {
+            if (!alreadyPlaying && firstFrameOfCharge && railgunAudio) {
+                railgunAudio.volume = 0.05
+                railgunAudio.play()
+                railgunAudio.onEnd(() => (alreadyPlaying = false))
 
-    if (!player.charged()) {
-        send('railgunCharge', { completion: elapsedCharge / RAILGUN_CHARGE_TIME })
-    }
-    if (player.charged() && !alreadySentFullCompletion) {
-        alreadySentFullCompletion = true
-        send('railgunCharge', { completion: 1 })
-    }
+                alreadyPlaying = true
+                firstFrameOfCharge = false
+            }
+            send('railgunCharge', { completion: elapsedCharge / RAILGUN_CHARGE_TIME })
+        }
+
+        if (player.charged() && !alreadySentFullCompletion) {
+            alreadySentFullCompletion = true
+            send('railgunCharge', { completion: 1 })
+        }
     })
 
     onKeyRelease(['x'], () => {
-    send('stoppedRailgunCharge', null)
-    alreadySentFullCompletion = false
+        send('stoppedRailgunCharge', null)
+        alreadySentFullCompletion = false
+        railgunAudio.stop()
+        alreadyPlaying = false
+        firstFrameOfCharge = true
 
-    if (player.charged()) {
-        fireRailgun(player.pos, player.angle - 180, true)
-        player.stun(10)
-        send('fireRailgun', null)
-    }
-    elapsedCharge = 0 
+        if (player.charged()) {
+            fireRailgun(player.pos, player.angle - 180, true)
+            player.stun(10)
+            send('fireRailgun', null)
+        }
+        elapsedCharge = 0 
     })
 
     const SHOT_COOLDOWN = 150
@@ -257,26 +281,27 @@ export default function setupCress(rounds: number) {
     const CENTER_OFFSET = 22
     let shooting = false
     onKeyDown(['z'], () => {
-    shooting = true
-    if (!paused && stunFrames == 0 && !player.charged() && Date.now() - lastShotTime > SHOT_COOLDOWN) {
+        shooting = true
+        if (!paused && stunFrames == 0 && !player.charged() && Date.now() - lastShotTime > SHOT_COOLDOWN) {
 
-        const data: ProjectileData = { 
-        type: 'cress laser',
-        sprite: 'cress bullet', 
-        pos: vec2(player.pos.add(shootOnLeftSide ? vec2(-CENTER_OFFSET, 0) : vec2(CENTER_OFFSET, 0))), 
-        direction: player.angle, 
-        speed: 15,
-        damage: 1
+            const data: ProjectileData = { 
+                type: 'cress laser',
+                sprite: 'cress bullet', 
+                pos: vec2(player.pos.add(shootOnLeftSide ? vec2(-CENTER_OFFSET, 0) : vec2(CENTER_OFFSET, 0))), 
+                direction: player.angle, 
+                speed: 15,
+                damage: 1,
+                sound: 'laser sound'
+            }
+
+            shoot(data, true)
+            shootOnLeftSide = !shootOnLeftSide
+            lastShotTime = Date.now()
         }
-
-        shoot(data, true)
-        shootOnLeftSide = !shootOnLeftSide
-        lastShotTime = Date.now()
-    }
     })
 
     onKeyRelease(['z'], () => {
-    shooting = false
+        shooting = false
     })
 
     return player

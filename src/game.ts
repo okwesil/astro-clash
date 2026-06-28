@@ -2,7 +2,7 @@ import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
 import { setupBackground } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
-import { setDataListener, isHost, send } from "./network"
+import { setDataListener, isHost, send, waitForPacket } from "./network"
 import { ZLevels } from "./main"
 
 export let paused = false
@@ -151,6 +151,7 @@ async function game() {
             countdown.animate('opacity', [0, 1], { duration: 0.4 })            
             countdown.text = i.toString()
         }
+
         countdown.text = 'GO!'
         wait(0.3, () => {
             countdown.destroy()
