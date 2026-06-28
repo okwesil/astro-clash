@@ -102,8 +102,12 @@ function menu() {
 
     idText.onClick(() => {
         if (_peerId) {
-            navigator.clipboard.writeText(_peerId)
-            debug.log('copied id')
+            try {
+                navigator.clipboard.writeText(_peerId)
+                debug.log('copied id')
+            } catch (error) {
+                console.error("Couldn't print because of: ", error)
+            }
         }
     })
 }

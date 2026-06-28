@@ -59,9 +59,11 @@ peer.on('error', (error) => {
     onError(error)
 })
 peer.on('disconnected', () => {
+    connectionListeners.close()
     console.log('Peer disconnected')
 })
 peer.on('close', () => {
+    connectionListeners.close()
     console.log('Peer closed')
 })
 
@@ -195,3 +197,5 @@ peer.on('connection', (c) => {
     isHost = true
     setupConnection(c)
 })
+
+export const closeConnection = () => conn?.close()

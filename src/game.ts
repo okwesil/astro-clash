@@ -2,7 +2,7 @@ import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
 import { setupBackground } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
-import { setDataListener, isHost, send } from "./network"
+import { setDataListener, isHost, send, closeConnection } from "./network"
 import { ZLevels } from "./main"
 
 export let paused = false
@@ -35,6 +35,13 @@ const score = {
     host: 0,
     other: 0,
 }
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        closeConnection()
+    }
+})
+
 async function game(reset: boolean) {
     if (reset) {
         rounds = 1
