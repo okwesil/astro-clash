@@ -27,17 +27,17 @@ export const ZLevels = [
   'win text'
 ]
 
-loadFont('pixel', 'src/assets/Minecraft.ttf')
-loadSprite('star','src/assets/star.png' )
+loadFont('pixel', '/assets/Minecraft.ttf')
+loadSprite('star','/assets/star.png' )
 
-loadSprite('crown', 'src/assets/red-crown.png')
-loadSprite('crown blue', 'src/assets/blue-crown.png')
+loadSprite('crown', '/assets/red-crown.png')
+loadSprite('crown blue', '/assets/blue-crown.png')
 
-loadSound('laser sound', 'src/assets/cress/laser-sfx.mp3')
-loadSound('railgun charging', 'src/assets/cress/railgun-charging.mp3')
-loadSound('railgun firing', 'src/assets/cress/railgun-fire.mp3')
+loadSound('laser sound', '/assets/cress/laser-sfx.mp3')
+loadSound('railgun charging', '/assets/cress/railgun-charging.mp3')
+loadSound('railgun firing', '/assets/cress/railgun-fire.mp3')
 
-loadSprite('cress', 'src/assets/cress/cress.png', {
+loadSprite('cress', '/assets/cress/cress.png', {
   sliceX: 4,
   sliceY: 2,
   anims: {
@@ -53,7 +53,7 @@ loadSprite('cress', 'src/assets/cress/cress.png', {
   }
 })
 
-loadSprite('cress blue', 'src/assets/cress/cress-blue.png', {
+loadSprite('cress blue', '/assets/cress/cress-blue.png', {
   sliceX: 4,
   sliceY: 2,
   anims: {
@@ -69,10 +69,10 @@ loadSprite('cress blue', 'src/assets/cress/cress-blue.png', {
   }
 })
 
-loadSprite('cress bullet', 'src/assets/cress/cress-bullet.png')
-loadSprite('cress bullet blue', 'src/assets/cress/cress-bullet-blue.png')
+loadSprite('cress bullet', '/assets/cress/cress-bullet.png')
+loadSprite('cress bullet blue', '/assets/cress/cress-bullet-blue.png')
 
-loadSprite('laser collide', 'src/assets/laser-collision.png', {
+loadSprite('laser collide', '/assets/laser-collision.png', {
   sliceX: 2,
   sliceY: 2,
   anims: {
@@ -83,7 +83,7 @@ loadSprite('laser collide', 'src/assets/laser-collision.png', {
   }
 })
 
-loadSprite('railgun', 'src/assets/cress/railgun-laser-longer.png', {
+loadSprite('railgun', '/assets/cress/railgun-laser-longer.png', {
   sliceX: 8,
   sliceY: 2,
   anims: {
@@ -98,7 +98,7 @@ loadSprite('railgun', 'src/assets/cress/railgun-laser-longer.png', {
   }
 })
 
-loadSprite('railgun blue', 'src/assets/cress/railgun-laser-blue.png', {
+loadSprite('railgun blue', '/assets/cress/railgun-laser-blue.png', {
   sliceX: 8,
   sliceY: 2,
   anims: {
@@ -113,7 +113,7 @@ loadSprite('railgun blue', 'src/assets/cress/railgun-laser-blue.png', {
   }
 })
 
-loadSprite('boom', 'src/assets/boom.png', {
+loadSprite('boom', '/assets/boom.png', {
   sliceX: 7,
   sliceY: 1,
   anims: {

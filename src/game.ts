@@ -36,6 +36,7 @@ const score = {
     other: 0,
 }
 
+// TODO: Add a timer here and make it so that the user has a grace period and if the connect back on time, then their client will ask the other for score and stuff
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         closeConnection()
