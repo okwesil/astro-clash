@@ -9,10 +9,10 @@ function generateId() {
 
 // metered.ca
 const peer = new Peer(generateId(), {
-    host: '192.168.1.87',
-    port: 9000,
-    path: '/astro-clash',
-    secure: false,
+    host: 'astro-clash-peerjs-server-796645945227.us-west2.run.app',
+    port: 443,
+    path: '/',
+    secure: true,
     config: {
         iceServers: [
             {
