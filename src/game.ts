@@ -127,9 +127,26 @@ async function game(reset: boolean) {
         }
     })
 
+
+    const arrow = add([
+        sprite('arrow'),
+        pos(),
+        follow(player, vec2(player.width / 2 + 20, 0)),
+        anchor('left'),
+        opacity(1),
+        scale(3),
+        animate(),
+    ])
+    arrow.animate('opacity', [1, 0], { duration: .5 })
+
+    wait(2, () => {
+        arrow.destroy()
+    })
+
+
     const playerScore = isHost ? score.host : score.other
     const otherPlayerScore = isHost ? score.other : score.host
-
+    // crown 
     if (playerScore != otherPlayerScore) {
         const currentPlayerIsWinning = playerScore > otherPlayerScore
         const crown = add([

@@ -29,6 +29,7 @@ export const ZLevels = [
 
 loadFont('pixel', '/assets/Minecraft.ttf')
 loadSprite('star','/assets/star.png' )
+loadSprite('arrow', '/assets/arrow.png')
 
 loadSprite('crown', '/assets/red-crown.png')
 loadSprite('crown blue', '/assets/blue-crown.png')
