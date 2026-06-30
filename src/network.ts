@@ -212,6 +212,7 @@ export function connect(id: string) {
         reliable: true,
         serialization: 'json'
     })
+    isHost = false
     setupConnection(connection)
 }
 

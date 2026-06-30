@@ -49,6 +49,29 @@ document.addEventListener('visibilitychange', () => {
     }
 })
 
+document.addEventListener('beforeunload', () => {
+    debug.log('reloaded')
+    send('reasonForDisconnect', { reason: 'Other played reloaded the page'})
+})
+
+function drawScoreboard(currentPlayerScore: number, otherPlayerScore: number) {
+    drawText({
+        text: `[red]${currentPlayerScore}[/red]:[blue]${otherPlayerScore}[/blue]`,
+        styles: {
+            red: {
+                color: RED
+            },
+            blue: {
+                color: BLUE
+            }
+        },
+        font: 'pixel',
+        anchor: 'top',
+        opacity: 0.5,
+        pos: vec2(width() / 2, 20)
+    })
+}
+
 async function game(reset: boolean) {
     if (reset) {
         rounds = 1
@@ -71,37 +94,6 @@ async function game(reset: boolean) {
     setupBackground()
     const player = setupPlayer(rounds)
     const otherPlayer = setupOtherPlayer(rounds)
-
-    const playerScore = isHost ? score.host : score.other
-    const otherPlayerScore = isHost ? score.other : score.host
-    //scoreboard
-    const scoreboard = add([
-        text(`[red]${playerScore}[/red]:[blue]${otherPlayerScore}[/blue]`, { 
-            font: 'pixel',
-            styles: {
-                red: {
-                    color: RED
-                },
-                blue: {
-                    color: BLUE
-                }
-            }
-        }),
-        pos(vec2(width() / 2, 20)),
-        anchor('top')
-    ])
-
-    if (playerScore != otherPlayerScore) {
-        const currentPlayerIsWinning = playerScore > otherPlayerScore
-        const crown = add([
-            sprite('crown' + (!currentPlayerIsWinning ? ' blue' : '')),
-            pos(),
-            follow(currentPlayerIsWinning ? player : otherPlayer, vec2(0, -(player.height / 2))),
-            anchor('bot'),
-            scale(3),
-        ])
-        wait(3, () => crown.destroy())
-    }
 
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore
@@ -136,6 +128,7 @@ async function game(reset: boolean) {
         else score.host++
         showWin(!isHost)
     })
+
     setDataListener('death', ({ hostWon, roundDied }) => {
         if (!paused) {
             paused = true
@@ -148,9 +141,29 @@ async function game(reset: boolean) {
         }
     })
 
+    const playerScore = isHost ? score.host : score.other
+    const otherPlayerScore = isHost ? score.other : score.host
+
+    if (playerScore != otherPlayerScore) {
+        const currentPlayerIsWinning = playerScore > otherPlayerScore
+        const crown = add([
+            sprite('crown' + (!currentPlayerIsWinning ? ' blue' : '')),
+            pos(),
+            follow(currentPlayerIsWinning ? player : otherPlayer, vec2(0, -(player.height / 2))),
+            anchor('bot'),
+            scale(2.5),
+        ])
+        wait(3, () => crown.destroy())
+    }
+    
     onUpdate(() => {
         player.otherPlayersPos = otherPlayer.pos
         otherPlayer.otherPlayersPos = player.pos
+
+        // fps visualizer
+        drawText({ text: 'FPS: ' + debug.fps().toString(), size: 20, pos: vec2(20, 20), font: 'pixel' })
+        
+        drawScoreboard(playerScore, otherPlayerScore)
     })
 
     let sentPing = false

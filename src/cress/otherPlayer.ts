@@ -7,7 +7,7 @@ import { drawStunCircle } from "../player"
 
 
 export default function setupOtherCress(rounds: number) {
-      let startPos = !isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
+  let startPos = !isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
   let angle = isHost ? 180 : 0
   if (rounds % 2 == 0) {
     startPos.y = height() - startPos.y
