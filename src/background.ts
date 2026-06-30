@@ -10,10 +10,11 @@ let stars: Star[] = []
 function createStar() {
     const star: Star = {
         pos: rand(vec2(width(), height())),
-        scale: rand(0.3, 1.2),
-        velocity: Vec2.fromAngle(rand(360)).scale(0.05)
+        scale: rand(0.3, 1),
+        velocity: Vec2.fromAngle(rand(360)).scale(rand(0.05, 0.4))
     }
     stars.push(star)
+    console.log(stars)
 }
 
 function isOffscreen(point: Vector): boolean {
@@ -36,15 +37,19 @@ export function setupBackground() {
 
     
     onUpdate(() => {
+        let starsToReAdd = 0
         stars = stars.filter((star) => {
             star.pos = star.pos.add(star.velocity)
 
             const offscreen = isOffscreen(star.pos)
-            if (offscreen) {
-                createStar()
-            }
+            if (offscreen) starsToReAdd++
+            
             return !offscreen
         })
+
+        for (let i = 0; i < starsToReAdd; i++) {
+            createStar()
+        }
 
     })
 
