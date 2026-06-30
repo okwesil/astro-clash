@@ -236,7 +236,7 @@ export default function setupCress(rounds: number) {
     })
     let firstFrameOfCharge = true
     let alreadyPlaying = false
-    onKeyDown(['x'], () => {
+    onKeyDown(['x', '/'], () => {
         if (paused) return
         elapsedCharge += dt()
         if (player.charged()) elapsedCharge = RAILGUN_CHARGE_TIME
@@ -259,7 +259,7 @@ export default function setupCress(rounds: number) {
         }
     })
 
-    onKeyRelease(['x'], () => {
+    onKeyRelease(['x', '/'], () => {
         send('stoppedRailgunCharge', null)
         alreadySentFullCompletion = false
         railgunAudio.stop()
@@ -279,7 +279,7 @@ export default function setupCress(rounds: number) {
     let shootOnLeftSide = false
     const CENTER_OFFSET = 22
     let shooting = false
-    onKeyDown(['z'], () => {
+    onKeyDown(['z', '.'], () => {
         shooting = true
         if (!paused && stunFrames == 0 && !player.charged() && Date.now() - lastShotTime > SHOT_COOLDOWN) {
 
