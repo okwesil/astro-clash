@@ -63,7 +63,7 @@ function menu(reason: string | undefined) {
     })
     let connecting = false
     const connectingText = add([
-        pos(vec2(width() / 2, height() / 2 + 50)),
+        pos(vec2(width() / 2, height() / 2 + 70)),
         anchor('center'),
         text(reason ? reason :  'connecting...', {
             size: 30,

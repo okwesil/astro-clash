@@ -1,6 +1,7 @@
 import { Peer, PeerError, type DataConnection } from 'peerjs'
 import type { Vec2 } from 'kaplay'
 import type { ProjectileData } from './projectiles'
+import type { Vector } from './game'
 
 function generateId() {
     return Math.floor(Math.random() * 100000).toString()
@@ -85,6 +86,7 @@ type PacketMap = {
     all: Packet
     movement: Vec2
     projectileShot: ProjectileData
+    projectilePos: { pos: Vector, projId: string }
     death: { hostWon: boolean; roundDied: number }
     healthChange: { maxHP: number, currentValue: number }
     stunFrames: { frames: number }
@@ -112,6 +114,7 @@ export const listeners: ListenerMap = {
     ping: () => {},
     movement: () => {},
     projectileShot: () => {},
+    projectilePos: () => {},
     death: () => {},
     healthChange: () => {},
     stunFrames: () => {},
@@ -191,7 +194,7 @@ function setupConnection(connection: DataConnection) {
     conn.on('iceStateChanged', (state) => {
         console.log('connection iceStateChanged', connection.peer, state)
         if (state == 'disconnected') {
-            connectionListeners.close('ice state changed, try refreshing')
+            connectionListeners.close('the other player has closed the connection :(')
         }
     })
     conn.on('error', (error) => {
@@ -199,7 +202,7 @@ function setupConnection(connection: DataConnection) {
     })
     conn.on('close', () => {
         console.log('connection closed', connection.peer)
-        let reasoning = reasonForClosure != null ? reasonForClosure : 'connection closed, try refreshing'
+        let reasoning = reasonForClosure != null ? reasonForClosure : 'the other player has closed the connection >:(' 
         connectionListeners.close(reasoning)
         reasonForClosure = null
         if (conn === connection) conn = null

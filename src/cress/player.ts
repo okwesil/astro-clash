@@ -290,7 +290,8 @@ export default function setupCress(rounds: number) {
                 direction: player.angle, 
                 speed: 15,
                 damage: 1,
-                sound: 'laser sound'
+                sound: 'laser sound',
+                projId: randi(100000).toString()
             }
 
             shoot(data, true)

@@ -49,11 +49,6 @@ document.addEventListener('visibilitychange', () => {
     }
 })
 
-document.addEventListener('beforeunload', () => {
-    debug.log('reloaded')
-    send('reasonForDisconnect', { reason: 'Other played reloaded the page'})
-})
-
 function drawScoreboard(currentPlayerScore: number, otherPlayerScore: number) {
     drawText({
         text: `[red]${currentPlayerScore}[/red]:[blue]${otherPlayerScore}[/blue]`,
@@ -79,15 +74,6 @@ async function game(reset: boolean) {
         score.other = 0
     }
 
-    // setDataListener('getCurrentState', () => {
-    //     send('currentState', { score, rounds })
-    // })
-
-    // setDataListener('currentState', ({ score: _score, rounds: _rounds }) => {
-    //     score = _score 
-    //     scoreboard.text = `[red]${isHost ? score.host : score.other}[/red]:[blue]${isHost ? score.other : score.host}[/blue]`
-    //     rounds = _rounds 
-    // })
 
     setDataListener('reasonForDisconnect', ({ reason }) => closeConnection( reason ))
 
@@ -149,10 +135,16 @@ async function game(reset: boolean) {
         const crown = add([
             sprite('crown' + (!currentPlayerIsWinning ? ' blue' : '')),
             pos(),
-            follow(currentPlayerIsWinning ? player : otherPlayer, vec2(0, -(player.height / 2))),
+            follow(currentPlayerIsWinning ? player : otherPlayer, vec2(0, -(player.height / 2 + 10))),
             anchor('bot'),
             scale(2.5),
+            opacity(1),
+            timer()
         ])
+
+        wait(2, () => {
+            crown.tween(1, 0, 1, (value) => (crown.opacity = value))
+        })
         wait(3, () => crown.destroy())
     }
     

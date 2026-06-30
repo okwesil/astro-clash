@@ -14,7 +14,6 @@ function createStar() {
         velocity: Vec2.fromAngle(rand(360)).scale(rand(0.05, 0.4))
     }
     stars.push(star)
-    console.log(stars)
 }
 
 function isOffscreen(point: Vector): boolean {

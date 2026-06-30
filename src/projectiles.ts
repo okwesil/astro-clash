@@ -12,15 +12,18 @@ export type ProjectileData = {
     direction: number
     speed: number
     sound: string
+    projId: string
 }
 
-type projFunction = (self: ProjectileObject) => void
+type updateFunction = (self: ProjectileObject, move: boolean) => void
 type onHitFunction = (player: ReturnType<typeof setupPlayer>, self: ProjectileObject) => void
-export const projFunctions: Record<ProjectileType, { update: projFunction, onHit: onHitFunction }> = {
+export const projFunctions: Record<ProjectileType, { update: updateFunction, onHit: onHitFunction }> = {
     'cress laser': {
-        update: (self) => {
+        update: (self, move) => {
             // @ts-ignore
-            self.pos = self.pos.add(Vec2.fromAngle(self.direction).scale(self.speed)) 
+            if (move) {
+                self.pos = self.pos.add(Vec2.fromAngle(self.direction).scale(self.speed)) 
+            }
         },
         onHit: (player, self) => {
             player.hurt(self.damage)
@@ -44,6 +47,7 @@ export function shoot(data: ProjectileData, sendToOtherPlayer: boolean) {
         (!sendToOtherPlayer ? 'enemy projectile' : 'friendly projectile'),
         'projectile',
         {
+            projId: data.projId,
             type: data.type,
             speed: data.speed,
             direction: data.direction - 90,
@@ -60,7 +64,8 @@ export function shoot(data: ProjectileData, sendToOtherPlayer: boolean) {
     }
 
     proj.onUpdate(() => {
-        projFunctions[proj.type].update(proj)
+        projFunctions[proj.type].update(proj, proj.is('enemy projectile'))
+        send('projectilePos', { pos: proj.pos, projId: proj.projId })
     })
     return proj
 }
