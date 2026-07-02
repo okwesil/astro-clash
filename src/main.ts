@@ -140,7 +140,7 @@ export async function transition(scene: string, ...args: any[]) {
 
   rectangle.tween(-rectangle.width, 0, TRANSITION_DURATION, (value) => (rectangle.pos.x = value))
   await wait(TRANSITION_DURATION)
-  go(scene, args)
+  go(scene, ...args)
 
   setTimeout(() => {
     rectangle.tween(0, width(), TRANSITION_DURATION, (value) => (rectangle.pos.x = value))

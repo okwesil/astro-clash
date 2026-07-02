@@ -189,19 +189,19 @@ async function game(reset: boolean) {
             debug.log(`${performance.now() - timePingWasSent}ms`)
             debug.log(`are you 'host': ${isHost ? 'yes' : 'no'}`)
             debug.log(`round ${rounds}`)
+            debug.log(`host: ${score.host} other: ${score.other}`)
             sentPing = false
         }
     })
 
     await showCountdown(3)
 
-
     async function showCountdown(start: number) {
         paused = true
         const countdown = add([
+            text(start.toString(), { size: 100, font: 'pixel' }),
             pos(center()),
             anchor('center'),
-            text(start.toString(), { size: 100, font: 'pixel' }),
             opacity(1),
             animate()
         ])
@@ -212,15 +212,12 @@ async function game(reset: boolean) {
             countdown.text = i.toString()
         }
 
-        countdown.text = 'GO!'
+        countdown.text = 'CLASH!'
         wait(0.3, () => {
             countdown.destroy()
         })
         paused = false
     }
-
-    
-
     
     async function showWin(hostWon: boolean) {
         paused = true

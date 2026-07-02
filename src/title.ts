@@ -25,8 +25,8 @@ function title() {
         timer(),
         animate()
     ])
-    logo.tween(-200, 20, 1, (value) => (logo.pos.y = value), easeOutElastic)
-    wait(2, () => {
+    logo.tween(-200, 20, 2, (value) => (logo.pos.y = value), easeOutElastic)
+    wait(3, () => {
         logo.animate('pos', [vec2(width() / 2, 40), vec2(width() / 2, 20)], { duration: 3, direction: 'ping-pong' })
     })
     
@@ -34,6 +34,7 @@ function title() {
         rect(0, 120),
         pos(width(), height() / 2 + 100),
         anchor('right'),
+        area(),
         timer(),
     ])
 
@@ -47,26 +48,28 @@ function title() {
         timer(),
     ])
 
-    playButton.onClick(() => {
+    rectangle.onClick(() => {
         transition('menu')
     })
 
 
 
-    let firstFrame = true
+    let firstFrame = true    
+    const RANGE_HEIGHT = 75
+    const mouseWithinRange = () => Math.floor(mousePos().y) > playButton.pos.y - RANGE_HEIGHT / 2 && Math.floor(mousePos().y) < playButton.pos.y + RANGE_HEIGHT / 2
     playButton.onUpdate(() => {
-        if (playButton.isHovering() && firstFrame) {
+        if (firstFrame && mouseWithinRange()) {
             firstFrame = false
             playButton.tween(vec2(1), vec2(1.2), 0.3, (value) => (playButton.scale = value))
             playButton.tween(WHITE, BLACK, 0.3, (value) => (playButton.color = value))
             rectangle.tween(0, width(), 0.1, (value) => rectangle.width = value)
-        } 
-
-        if (!playButton.isHovering() && !firstFrame) {
+        }
+        
+        if (!firstFrame && !mouseWithinRange()) {
+            firstFrame = true
             playButton.tween(vec2(1.2), vec2(1), 0.3, (value) => (playButton.scale = value))
             playButton.tween(BLACK, WHITE, 0.3, (value) => (playButton.color = value))
             rectangle.tween(width(), 0, 0.1, (value) => rectangle.width = value)
-            firstFrame = true
         }
     })
 

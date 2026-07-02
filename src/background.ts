@@ -11,7 +11,7 @@ function createStar() {
     const star: Star = {
         pos: rand(vec2(width(), height())),
         scale: rand(0.3, 1),
-        velocity: Vec2.fromAngle(rand(360)).scale(rand(0.05, 0.4))
+        velocity: Vec2.fromAngle(rand(360)).scale(rand(0.01, 0.2))
     }
     stars.push(star)
 }
