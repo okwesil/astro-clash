@@ -1,7 +1,7 @@
 import type { AudioPlay } from "kaplay"
 import { angleBetween, paused, type Vector } from "../game"
 import { ZLevels } from "../main"
-import { isHost, send } from "../network"
+import { isHost, send, setDataListener } from "../network"
 import { drawStunCircle, MAX_STUN } from "../player"
 import { shoot, type ProjectileData } from "../projectiles"
 
@@ -299,6 +299,12 @@ export default function setupCress(rounds: number) {
             lastShotTime = Date.now()
         }
     })
+
+    setDataListener('projectilePos', (data) => [
+        query({ include: 'friendly projectile' }).forEach(proj => {
+            if (proj.projId == data.projId) proj.pos = vec2(data.pos.x, data.pos.y)
+        })
+    ])
 
     onKeyRelease(['z'], () => {
         shooting = false

@@ -52,7 +52,9 @@ function title() {
         transition('menu')
     })
 
-
+    onKeyPress('enter', () => {
+        transition('menu')
+    })
 
     let firstFrame = true    
     const RANGE_HEIGHT = 75

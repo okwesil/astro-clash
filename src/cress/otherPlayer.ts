@@ -61,12 +61,6 @@ export default function setupOtherCress(rounds: number) {
         player.pos.y = data.y
     })
 
-    setDataListener('projectilePos', (data) => {
-        onUpdate('friendly projectile', (proj) => {
-            if (proj.projId == data.projId) proj.pos = vec2(data.pos.x, data.pos.y)
-        })
-    })
-
     setDataListener('projectileShot', (data) => {
         shoot(data, false)
     })

@@ -76,6 +76,10 @@ async function game(reset: boolean) {
 
 
     setDataListener('reasonForDisconnect', ({ reason }) => closeConnection( reason ))
+    setDataListener('all', (packet) => {
+        console.log(packet)
+    })
+
 
     setupBackground()
     const player = setupPlayer(rounds)
@@ -92,6 +96,9 @@ async function game(reset: boolean) {
         wait(0.1, () =>  player.hurt(100))
     })
 
+    onUpdate('enemy projectile', (proj) => {
+        send('projectilePos', { pos: proj.pos, projId: proj.projId })
+    })
 
     otherPlayer.onCollide('friendly projectile', (proj) => {
         proj.destroy()
@@ -190,6 +197,7 @@ async function game(reset: boolean) {
             debug.log(`are you 'host': ${isHost ? 'yes' : 'no'}`)
             debug.log(`round ${rounds}`)
             debug.log(`host: ${score.host} other: ${score.other}`)
+            debug.log(`objects: ${debug.numObjects()}`)
             sentPing = false
         }
     })

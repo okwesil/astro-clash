@@ -212,8 +212,7 @@ function setupConnection(connection: DataConnection) {
 export function connect(id: string) {
     console.log('connect() called with id', id)
     const connection = peer.connect(id, {
-        reliable: true,
-        serialization: 'json'
+        reliable: false,
     })
     isHost = false
     setupConnection(connection)
