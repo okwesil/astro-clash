@@ -302,7 +302,7 @@ export default function setupCress(rounds: number) {
 
     setDataListener('projectilePos', (data) => [
         query({ include: 'friendly projectile' }).forEach(proj => {
-            if (proj.projId == data.projId) proj.pos = vec2(data.pos.x, data.pos.y)
+            if (proj.projId == data.projId) proj.targetPos = vec2(data.pos.x, data.pos.y)
         })
     ])
 

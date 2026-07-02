@@ -21,7 +21,7 @@ export default function setupOtherCress(rounds: number) {
         color(),
         scale(1.2),
         z(ZLevels.indexOf('other player')),
-        area(),
+        area({ scale: 1.2}),
         rotate(angle),
         anchor("center"),
         opacity(1),

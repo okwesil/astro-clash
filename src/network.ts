@@ -24,7 +24,22 @@ host: 'astro-clash-peerjs-server-796645945227.us-west2.run.app',
                 username: "e1d9bd163975135eac0144ef",
                 credential: "BZo6UPDzxTNZ8S1C",
             },
-        ]
+            {
+                urls: "turn:standard.relay.metered.ca:80?transport=tcp",
+                username: "e1d9bd163975135eac0144ef",
+                credential: "BZo6UPDzxTNZ8S1C",
+            },
+            {
+                urls: "turn:standard.relay.metered.ca:443",
+                username: "e1d9bd163975135eac0144ef",
+                credential: "BZo6UPDzxTNZ8S1C",
+            },
+            {
+                urls: "turns:standard.relay.metered.ca:443?transport=tcp",
+                username: "e1d9bd163975135eac0144ef",
+                credential: "BZo6UPDzxTNZ8S1C",
+            },
+        ],
     },
 }
 let peer = new Peer(generateId(), PEER_CONFIG)
@@ -87,6 +102,7 @@ type PacketMap = {
     movement: Vec2
     projectileShot: ProjectileData
     projectilePos: { pos: Vector, projId: string }
+    deleteProjectile: { projId: string }
     death: { hostWon: boolean; roundDied: number }
     healthChange: { maxHP: number, currentValue: number }
     stunFrames: { frames: number }
@@ -115,6 +131,7 @@ export const listeners: ListenerMap = {
     movement: () => {},
     projectileShot: () => {},
     projectilePos: () => {},
+    deleteProjectile: () => {},
     death: () => {},
     healthChange: () => {},
     stunFrames: () => {},

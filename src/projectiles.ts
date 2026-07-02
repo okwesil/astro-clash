@@ -52,6 +52,7 @@ export function shoot(data: ProjectileData, createdByCurrPlayer: boolean) {
             speed: data.speed,
             direction: data.direction - 90,
             damage: data.damage,
+            targetPos: data.pos
         }
     ])
 

@@ -89,6 +89,7 @@ async function game(reset: boolean) {
         // @ts-ignore
         projFunctions[proj.type].onHit(player, proj)
         createLaserCollisionParticles(proj.pos)
+        send('deleteProjectile', proj.projId)
         proj.destroy()
     })
 
@@ -100,15 +101,26 @@ async function game(reset: boolean) {
         send('projectilePos', { pos: proj.pos, projId: proj.projId })
     })
 
+    setDataListener('deleteProjectile', ({ projId }) => {
+        query({ include: 'friendly projectile' }).forEach(proj => {
+            if (proj.projId == projId) proj.destroy()
+        })
+    })
+
     otherPlayer.onCollide('friendly projectile', (proj) => {
         proj.destroy()
         createLaserCollisionParticles(proj.pos)
     })
 
     onCollide('enemy projectile', 'friendly projectile', (a, b) => {
+        send('deleteProjectile', a.projId)
         createLaserCollisionParticles(a.pos)
         a.destroy()
         b.destroy()
+    })
+
+    onUpdate('friendly projectile', (proj) => {
+        proj.pos = lerp(proj.pos, proj.targetPos, 0.5)
     })
 
     // TODO: fix bug where if both players death at the same time, both get credited a loss
