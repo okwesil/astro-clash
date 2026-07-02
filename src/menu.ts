@@ -1,6 +1,5 @@
 import { setupBackground } from './background'
-import { ZLevels } from './main'
-import './network'
+import { transition, ZLevels } from './main'
 import { connect, peerId, setConnectionListener, setOnError } from './network'
 
 
@@ -10,9 +9,10 @@ export function setupMenu() {
 }
 
 function menu(reason: string | undefined) {
+    setConnectionListener('close', (reason) => transition('menu', reason))
     setBackground(BLACK)
     setupBackground()
-    setConnectionListener('open', () => go('game', true))
+    setConnectionListener('open', () => transition('game', true))
     
 
     const idText = add([

@@ -2,7 +2,8 @@ import kaplay from "kaplay"
 import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
-import { setConnectionListener } from "./network"
+import { setupTitle } from "./title"
+import { setupBackground } from "./background"
 
 kaplay({
   width: 700,
@@ -12,7 +13,6 @@ kaplay({
   crisp: true,
 })
 
-setConnectionListener('close', (reason) => go('menu', reason))
 console.log('main.ts loaded', window.location.href)
 
 export const ZLevels = [
@@ -30,6 +30,7 @@ export const ZLevels = [
 loadFont('pixel', '/assets/Minecraft.ttf')
 loadSprite('star','/assets/star.png' )
 loadSprite('arrow', '/assets/arrow.png')
+loadSprite('logo', '/assets/logo.png')
 
 loadSprite('crown', '/assets/red-crown.png')
 loadSprite('crown blue', '/assets/blue-crown.png')
@@ -125,8 +126,31 @@ loadSprite('boom', '/assets/boom.png', {
   }
 })
 
-// setupPlayer()
+const TRANSITION_DURATION = 0.15
+export async function transition(scene: string, ...args: any[]) {
+  const rectangle = add([
+    rect(width(), height()),
+    pos(-width(), 0),
+    anchor('topleft'),
+    z(100000),
+    timer(),
+    stay(),
+    color(BLACK)
+  ])
+
+  rectangle.tween(-rectangle.width, 0, TRANSITION_DURATION, (value) => (rectangle.pos.x = value))
+  await wait(TRANSITION_DURATION)
+  go(scene, args)
+
+  setTimeout(() => {
+    rectangle.tween(0, width(), TRANSITION_DURATION, (value) => (rectangle.pos.x = value))
+    setTimeout(() => rectangle.destroy(), TRANSITION_DURATION * 1000)
+  }, 100)
+}
+
+setupBackground()
+setupTitle()
 setupMenu()
 setupGame()
-go('menu')
+transition('title')
 

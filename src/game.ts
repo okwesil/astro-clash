@@ -3,7 +3,7 @@ import { setupPlayer } from "./player"
 import { setupBackground } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
 import { setDataListener, isHost, send, closeConnection } from "./network"
-import { ZLevels } from "./main"
+import { transition, ZLevels } from "./main"
 
 export let paused = false
 export function setupGame() {
@@ -249,7 +249,7 @@ async function game(reset: boolean) {
         ])
         wait(1, async () => {
             textObject.destroy()
-            go('game', false)
+            transition('game', false)
         })
         
     }
