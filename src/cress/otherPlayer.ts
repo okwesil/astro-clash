@@ -33,12 +33,13 @@ export default function setupOtherCress(rounds: number) {
         }
     ])
 
+    let autoaim = true
     player.onUpdate(() => {
         if (player.blinking) {
             player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / player.blinkingFrequency) +  1), 1)
         }
 
-        if (railgunChargeCompletion == 0) {
+        if (autoaim) {
             player.angle = angleBetween(player.pos, player.otherPlayersPos)
         }
     })
@@ -78,6 +79,7 @@ export default function setupOtherCress(rounds: number) {
     let railgunChargeCompletion = 0
     setDataListener('railgunCharge', ({ completion }) => {
         railgunChargeCompletion = completion
+        autoaim = false
     })
 
     setDataListener('stoppedRailgunCharge', () => {
@@ -86,10 +88,12 @@ export default function setupOtherCress(rounds: number) {
 
     setDataListener('aimingRailgun', ({ angle }) => {
         player.angle = angle
+        autoaim = false
     })
 
     setDataListener('fireRailgun', () => {
         fireRailgun(player.pos, player.angle - 180, false)
+        autoaim = true
     })
 
   return player

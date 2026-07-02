@@ -222,17 +222,16 @@ async function game(reset: boolean) {
     async function showWin(hostWon: boolean) {
         paused = true
         const loseText = [
-            'You lose.',
-            ':(',
-            'You suck.',
-            'Lock in bro.',
+            'you lose.',
+            'u lose.',
+            'lock in bro.',
             'embarrasing.',
-            'just hop off',
-            '*sigh*',
+            'sigh',
+            ':(',
+            ':|',
             ':(',
             ':[',
             '>:(',
-            ':/',
             'x_x'
         ]
 
