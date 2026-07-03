@@ -43,10 +43,11 @@ function menu(reason: string | undefined) {
         color(BG_COLOR),
         z(ZLevels.indexOf('menu text background'))
     ])
+    const startingMessage = 'type the id of the player you want to join'
     const input = add([
         pos(center()),
         anchor('center'),
-        text('type the id of the player you want to join', {
+        text(startingMessage, {
             size: 30,
             width: 500,
             font: 'pixel'
@@ -90,7 +91,8 @@ function menu(reason: string | undefined) {
     })
 
     input.onKeyPress('enter', () => {
-        if (input.text.length > 2 && !connecting) {
+        console.log(input.text)
+        if (input.text.length > 2 && input.text != startingMessage && !connecting) {
             connect(input.text)
             connecting = true
         }
@@ -100,6 +102,8 @@ function menu(reason: string | undefined) {
     // onKeyPress('p', () => {
     //     go('game')
     // })
+
+    onKeyPress('escape', () => transition('title'))
 
     idText.onClick(() => {
         if (_peerId) {

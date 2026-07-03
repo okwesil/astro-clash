@@ -1,4 +1,4 @@
-import kaplay from "kaplay"
+import kaplay, { type GameObj } from "kaplay"
 import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
@@ -126,7 +126,7 @@ loadSprite('boom', '/assets/boom.png', {
   }
 })
 
-const TRANSITION_DURATION = 0.15
+const TRANSITION_DURATION = .15
 export async function transition(scene: string, ...args: any[]) {
   const rectangle = add([
     rect(width(), height()),
@@ -139,7 +139,7 @@ export async function transition(scene: string, ...args: any[]) {
   ])
 
   rectangle.tween(-rectangle.width, 0, TRANSITION_DURATION, (value) => (rectangle.pos.x = value))
-  await wait(TRANSITION_DURATION)
+  await new Promise((resolve) => setTimeout(resolve, TRANSITION_DURATION * 1000))
   go(scene, ...args)
 
   setTimeout(() => {

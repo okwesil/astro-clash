@@ -26,6 +26,7 @@ export default function setupOtherCress(rounds: number) {
         anchor("center"),
         opacity(1),
         'cress',
+        'player',
         {
             targetPos: startPos,
             otherPlayersPos: vec2(),
@@ -79,6 +80,10 @@ export default function setupOtherCress(rounds: number) {
         }
 
         shoot(data.data, false, -1)
+    })
+
+    setDataListener('ammo', ({ ammo }) => {
+        ammoBar.height = ammo / MAX_AMMO * player.height
     })
 
 

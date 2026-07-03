@@ -1,6 +1,6 @@
 import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
-import { setupBackground } from "./background"
+import { setupBackground, Trail } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
 import { setDataListener, isHost, send, closeConnection } from "./network"
 import { transition, ZLevels } from "./main"
@@ -27,8 +27,6 @@ function boom(position: Vector) {
         anchor('center'),
     ])
 }
-
-
 
 let rounds = 1
 let score = {
@@ -85,6 +83,7 @@ async function game(reset: boolean) {
     const player = setupPlayer(rounds)
     const otherPlayer = setupOtherPlayer(rounds)
 
+
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore
         projFunctions[proj.type].onHit(player, proj)
@@ -93,11 +92,26 @@ async function game(reset: boolean) {
         proj.destroy()
     })
 
-    player.onCollide('enemy railgun', () => {
-        wait(0.1, () =>  player.hurt(100))
+    player.onCollide('enemy railgun', (railgun) => {
+        wait(0.1, () =>  {
+            player.hurt(70)
+            player.knockback(Vec2.fromAngle(railgun.angle + 90 + randi(-60, 60)), 1300)
+            new Trail(player, 100, 500, 1)
+        })
     })
 
-    
+    otherPlayer.onCollide('friendly railgun', () => {
+        new Trail(otherPlayer, 100, 500, 2)
+    })
+
+    onCollide('player', 'ui', (_, ui) => {
+        ui.tween(ui.opacity, 0.1, 0.3, (value: number) => (ui.opacity = value))
+    })
+
+    onCollideEnd('player', 'ui', (_, ui) => {
+        ui.tween(0.1, 0.5, 0.3, (value: number) => (ui.opacity = value))
+    })
+
     setDataListener('deleteProjectiles', ({ projIds }) => {
         query({ include: [ ...projIds ], includeOp: 'or' }).forEach(proj => {
             proj.destroy()

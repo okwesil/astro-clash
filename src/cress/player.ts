@@ -38,10 +38,10 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
         sprite('railgun' + (red ? '' : ' blue'), { anim: 'fire' }),
         anchor('top'),
         pos(position),
-        area({ scale: vec2(0.1, 1)}),
+        area({ scale: vec2(0.2, 1)}),
         rotate(angle),
         z(ZLevels.indexOf('railgun')),
-        scale(vec2(1, 2)),
+        scale(vec2(1, 1.5)),
         (red ? 'friendly railgun' : 'enemy railgun')
     ])
 
@@ -89,20 +89,24 @@ export default function setupCress(rounds: number) {
         area(),
         rotate(angle),
         scale(1.2),
+        offscreen(),
         z(ZLevels.indexOf('current player')),
         anchor("center"),
         opacity(1),
         'current player',
         'cress',
+        'player',
         {
             vel: vec2(),
+            angularSpeed: 0,
+            turningDirection: '',
             knockbackVel: vec2(),
             angleX: 0,
             stun: (duration: number) => {
-            stunFrames = Math.min(duration, MAX_STUN)
+                stunFrames = Math.min(duration, MAX_STUN)
             },
             knockback: (direction: Vector, strength: number) => {
-            player.knockbackVel = player.knockbackVel.add(direction.scale(strength))
+                player.knockbackVel = player.knockbackVel.add(direction.scale(strength))
             },
             charged: () => elapsedCharge >= RAILGUN_CHARGE_TIME - 0.01,
             otherPlayersPos: vec2()
@@ -128,6 +132,23 @@ export default function setupCress(rounds: number) {
 
     let lastPos = player.pos
 
+    function partiallyOffscreen(padding: number): 'top' | 'left' | 'right' | 'bottom' | null {
+        const halfWidth = player.width / 2
+        const halfHeight = player.height / 2
+
+        const right = player.pos.x + halfWidth
+        const left = player.pos.x - halfWidth
+        const top = player.pos.y - halfHeight
+        const bottom = player.pos.y + halfHeight
+
+        if (right >= width() - padding) return 'right'
+        if (left <= padding) return 'left'
+        if (bottom >= height() - padding) return 'bottom'
+        if (top <= padding) return 'top'
+
+        return null
+    }
+
     function keepPlayerOnScreen() {
         const halfWidth = player.width / 2
         const halfHeight = player.height / 2
@@ -146,11 +167,33 @@ export default function setupCress(rounds: number) {
 
     player.onUpdate(() => {
         if (paused) { player.vel = vec2(); return }
+        timeSinceLastShot += dt()
+        if (timeSinceLastShot > 1 && ammoRefreshTimer == null && ammo < MAX_AMMO) {
+            ammoBar.tween(ammoBar.height, AMMO_BAR_HEIGHT, 0.3, (value) => (ammoBar.height =  value))
+            wait(0.3, () => {
+                ammo = MAX_AMMO
+                send('ammo', { ammo })
+            })
+        }
 
         player.vel = player.vel.add(player.knockbackVel)
         player.move(player.vel)
         player.vel = player.vel.scale(FRICTION)
         player.knockbackVel = player.knockbackVel.scale(KNOCKBACK_FRICTION)
+
+        const offscreenSide = partiallyOffscreen(1)
+        if (player.knockbackVel.len() > 0 && offscreenSide != null) {
+            if (offscreenSide == 'right' || offscreenSide == 'left') {
+                player.knockbackVel.x *= -1
+                player.vel.x *= -1
+            }
+
+            if (offscreenSide == 'top' || offscreenSide == 'bottom') {
+                console.log('knockback')
+                player.knockbackVel.y *= -1
+                player.vel.y *= -1
+            }
+        }
 
         keepPlayerOnScreen()
 
@@ -177,6 +220,9 @@ export default function setupCress(rounds: number) {
             player.play('idle')
             } 
         }
+
+
+        player.angle += player.angularSpeed
 
         if (Math.floor(player.pos.x) == Math.floor(lastPos.x) && Math.floor(player.pos.y) == Math.floor(lastPos.y)) return
         send('movement',  player.pos)
@@ -207,11 +253,32 @@ export default function setupCress(rounds: number) {
         if (stunFrames > 0 || elapsedCharge != 0) return
         movePlayer(vec2(0, 1))
     })
+
+
+    let firstFrameOfTurning = true
+    const turnPlayer = (side: 'left' | 'right') => {
+        if (!firstFrameOfTurning) {
+            if (side != player.turningDirection) {
+                player.turningDirection = side
+                player.angularSpeed *= -1
+            }
+            return
+        }
+        firstFrameOfTurning = false
+        let normalizedAngle = player.angle % 360
+        if (normalizedAngle < 0) normalizedAngle += 360
+
+        let direction = side == 'left' ? -1 : 1
+        if (normalizedAngle > 90 && normalizedAngle < 270) direction *= -1
+        player.angularSpeed = direction
+        player.turningDirection = side
+    }
+
     onKeyDown(['a', 'left'], () => {
         if (stunFrames > 0) return
 
         if (elapsedCharge != 0) {
-            player.angle -= 1
+            turnPlayer('left')
             send('aimingRailgun', { angle: player.angle})
             return
         }
@@ -222,12 +289,17 @@ export default function setupCress(rounds: number) {
         if (stunFrames > 0) return
 
         if (elapsedCharge != 0) {
-            player.angle += 1
+            turnPlayer('right')
             send('aimingRailgun', { angle: player.angle })
             return
         }
 
         movePlayer(vec2(1, 0))
+    })
+
+    onKeyRelease(['a', 'left', 'd', 'right'], () => {
+        firstFrameOfTurning = true
+        player.angularSpeed = 0
     })
 
     let alreadySentFullCompletion = false
@@ -283,12 +355,14 @@ export default function setupCress(rounds: number) {
     let shootOnLeftSide = false
     const CENTER_OFFSET = 22
     let shooting = false
+    let timeSinceLastShot = 0
 
     onKeyDown(['z', '.'], () => {
         if (!paused && stunFrames == 0 && !player.charged() && ammo > 0 && Date.now() - lastShotTime > SHOT_COOLDOWN) {
             shooting = true
             ammo--
             ammoBar.height = ammo / MAX_AMMO * AMMO_BAR_HEIGHT
+            timeSinceLastShot = 0
             const data: ProjectileData = { 
                 type: 'cress laser',
                 sprite: 'cress bullet', 
@@ -330,7 +404,10 @@ export default function setupCress(rounds: number) {
         anchor('botright'),
         outline(5, WHITE),
         opacity(0.5),
-        animate()
+        animate(),
+        timer(),
+        area(),
+        'ui'
     ])
 
     ammoBarOutline.animate('opacity', [0, 0.5], { duration: AMMO_REFRESH_TIME / 10, direction: 'ping-pong'})
@@ -343,6 +420,8 @@ export default function setupCress(rounds: number) {
         color(BLUE),
         opacity(0.5),
         timer(),
+        area(),
+        'ui'
     ])
 
 

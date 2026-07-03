@@ -4,7 +4,11 @@ import type { ProjectileData } from './projectiles'
 import type { Vector } from './game'
 
 function generateId() {
-    return Math.floor(Math.random() * 100000).toString()
+    let id = ''
+    for (let i = 0; i < 6; i++) {
+        id += Math.round(Math.random() * 9).toString()
+    }
+    return id
 }
 
 
@@ -101,6 +105,7 @@ type PacketMap = {
     all: Packet
     movement: Vec2
     projectileShot: { data: ProjectileData, newAmmo: number }
+    ammo: { ammo: number }
     projectilePositions: { pos: Vector[], projId: string[] }
     deleteProjectiles: { projIds: string[] }
     death: { hostWon: boolean; roundDied: number }
@@ -130,6 +135,7 @@ export const listeners: ListenerMap = {
     ping: () => {},
     movement: () => {},
     projectileShot: () => {},
+    ammo: () => {},
     projectilePositions: () => {},
     deleteProjectiles: () => {},
     death: () => {},
