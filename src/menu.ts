@@ -20,9 +20,10 @@ function menu(reason: string | undefined) {
         anchor('center'),
         text('generating ID', {
             size: 60,
-            width: 500,
-            font: 'pixel'
-        }),
+            width: width(),
+            font: 'pixel',
+            align: 'center'
+        }), 
         area(),
         color(rgb(255, 37, 37)),
     ])

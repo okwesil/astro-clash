@@ -1,4 +1,4 @@
-import type { AnchorComp, Color, GameObj, PosComp, RotateComp, ScaleComp, SpriteComp } from "kaplay"
+import type { AnchorComp, GameObj, PosComp, RotateComp, ScaleComp, SpriteComp } from "kaplay"
 import type { Vector } from "./game"
 
 type Star = {
@@ -36,7 +36,6 @@ export function setupBackground() {
     setBackground(BG_COLOR as any)
     fillScreenWithStars()
 
-    
     onUpdate(() => {
         let starsToReAdd = 0
         stars = stars.filter((star) => {

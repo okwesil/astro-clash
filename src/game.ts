@@ -65,6 +65,8 @@ function drawScoreboard(currentPlayerScore: number, otherPlayerScore: number) {
     })
 }
 
+
+
 async function game(reset: boolean) {
     if (reset) {
         rounds = 1
@@ -72,6 +74,12 @@ async function game(reset: boolean) {
         score.other = 0
     }
 
+    add([
+        rect(width(), height(), { fill: false }),
+        pos(0, 0),
+        outline(4, WHITE, 0.1),
+    ])
+    
 
     setDataListener('reasonForDisconnect', ({ reason }) => closeConnection( reason ))
     // setDataListener('all', (packet) => {
@@ -93,7 +101,7 @@ async function game(reset: boolean) {
     })
 
     player.onCollide('enemy railgun', (railgun) => {
-        wait(0.1, () =>  {
+        wait(0.2, () =>  {
             player.hurt(70)
             player.knockback(Vec2.fromAngle(railgun.angle + 90 + randi(-60, 60)), 1300)
             new Trail(player, 100, 500, 1)

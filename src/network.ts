@@ -3,9 +3,9 @@ import type { Vec2 } from 'kaplay'
 import type { ProjectileData } from './projectiles'
 import type { Vector } from './game'
 
-function generateId() {
+function generateId(length: number) {
     let id = ''
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < length; i++) {
         id += Math.round(Math.random() * 9).toString()
     }
     return id
@@ -46,7 +46,7 @@ host: 'astro-clash-peerjs-server-796645945227.us-west2.run.app',
         ],
     },
 }
-let peer = new Peer(generateId(), PEER_CONFIG)
+let peer = new Peer(generateId(5), PEER_CONFIG)
 
 export let peerId = new Promise<string>((resolve) => peer.on('open', (id) => {
     console.log('Peer open', id)

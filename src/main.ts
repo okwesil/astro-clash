@@ -1,4 +1,4 @@
-import kaplay, { type GameObj } from "kaplay"
+import kaplay from "kaplay"
 import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
@@ -154,13 +154,18 @@ const fpsVisual = add([
     font: 'pixel'
   }),
   pos(vec2(20)),
+  area(),
+  opacity(1),
   stay(),
+  timer(),
+  'ui',
   {
     update: () => {
       fpsVisual.text = debug.fps().toString()
     }
   }
 ])
+
 
 setupBackground()
 setupTitle()
