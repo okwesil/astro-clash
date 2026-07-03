@@ -10,8 +10,8 @@ let stars: Star[] = []
 function createStar() {
     const star: Star = {
         pos: rand(vec2(width(), height())),
-        scale: rand(0.3, 1),
-        velocity: Vec2.fromAngle(rand(360)).scale(rand(0.01, 0.2))
+        scale: rand(0.3, 2),
+        velocity: Vec2.fromAngle(rand(360)).scale(rand(0.01, 0.5))
     }
     stars.push(star)
 }

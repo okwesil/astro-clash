@@ -1,0 +1,14 @@
+/* .ammo-bar {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    width: 30px;
+    height: 200px;
+    background-color: white;
+    border: 2px solid white;
+} */
+
+body {
+    overflow: hidden;
+    background-color: black;
+}

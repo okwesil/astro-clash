@@ -74,6 +74,4 @@ function title() {
             rectangle.tween(width(), 0, 0.1, (value) => rectangle.width = value)
         }
     })
-
-    
 }

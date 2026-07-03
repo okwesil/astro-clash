@@ -1,4 +1,4 @@
-import type { AudioPlay } from "kaplay"
+import type { AudioPlay, TimerController } from "kaplay"
 import { angleBetween, paused, type Vector } from "../game"
 import { ZLevels } from "../main"
 import { isHost, send, setDataListener } from "../network"
@@ -22,7 +22,8 @@ export function drawChargeCircle(pos: Vector, width: number, completion: number)
 export function drawRailgunAimingLine(p1: Vector, angle: number, completion: number) {
   const radians = (angle - 90) / 180 * Math.PI
   p1 = p1.add(Vec2.fromAngle(angle - 90).scale(50))
-  const p2 = vec2(p1.x + (700 * Math.cos(radians)), p1.y + (700 * Math.sin(radians)))
+  const length = width() * 2
+  const p2 = vec2(p1.x + (length * Math.cos(radians)), p1.y + (length * Math.sin(radians)))
 
   const color = completion == 1 ? RED : rgb(100, 0, 0)
   drawLine({
@@ -33,15 +34,16 @@ export function drawRailgunAimingLine(p1: Vector, angle: number, completion: num
 }
 
 export function fireRailgun(position: Vector, angle: number, red: boolean) {
-  const railgun = add([
-    sprite('railgun' + (red ? '' : ' blue'), { anim: 'fire' }),
-    anchor('top'),
-    pos(position),
-    area({ scale: vec2(0.1, 1)}),
-    rotate(angle),
-    z(ZLevels.indexOf('railgun')),
-    (red ? 'friendly railgun' : 'enemy railgun')
-  ])
+    const railgun = add([
+        sprite('railgun' + (red ? '' : ' blue'), { anim: 'fire' }),
+        anchor('top'),
+        pos(position),
+        area({ scale: vec2(0.1, 1)}),
+        rotate(angle),
+        z(ZLevels.indexOf('railgun')),
+        scale(vec2(1, 2)),
+        (red ? 'friendly railgun' : 'enemy railgun')
+    ])
 
   play('railgun firing', {
     volume: 0.2
@@ -63,6 +65,8 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
   shake(50)
 }
 
+const MAX_AMMO = 20
+const AMMO_REFRESH_TIME = 2
 export default function setupCress(rounds: number) {
     const SPEED = 80
     const FRICTION = 0.8
@@ -70,8 +74,8 @@ export default function setupCress(rounds: number) {
     let startPos = isHost ? center().add(vec2(0, -200)) : center().add(vec2(0, 200))
     let angle = isHost ? 180 : 0
     if (rounds % 2 == 0) {
-    startPos.y = height() - startPos.y
-    angle += 180
+        startPos.y = height() - startPos.y
+        angle += 180
     }
     let elapsedCharge = 0
 
@@ -106,42 +110,38 @@ export default function setupCress(rounds: number) {
     ])
 
     let stunFrames = 0
-
-
     player.onHeal(() => {
-    send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
+        send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
     })
 
     let blinking = false
     let blinkingFrequency = 8
     player.onHurt(() => {
-    if (player.hp() < (player.maxHP() as number) * 0.65) {
-        blinking = true
-    }
-    if (player.hp() < (player.maxHP() as number) * 0.25) {
-        blinkingFrequency = 1
-    }
-    send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
+        if (player.hp() < (player.maxHP() as number) * 0.65) {
+            blinking = true
+        }
+        if (player.hp() < (player.maxHP() as number) * 0.25) {
+            blinkingFrequency = 1
+        }
+        send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp()})
     })
 
     let lastPos = player.pos
 
     function keepPlayerOnScreen() {
-    const halfWidth = player.width / 2
-    const halfHeight = player.height / 2
+        const halfWidth = player.width / 2
+        const halfHeight = player.height / 2
 
-    const right = player.pos.x + halfWidth
-    const left = player.pos.x - halfWidth
-    const top = player.pos.y - halfHeight
-    const bottom = player.pos.y + halfHeight
+        const right = player.pos.x + halfWidth
+        const left = player.pos.x - halfWidth
+        const top = player.pos.y - halfHeight
+        const bottom = player.pos.y + halfHeight
 
-    if (right > width()) player.pos.x = width() - halfWidth
-    if (left < 0) player.pos.x = halfWidth
-    if (bottom > height()) player.pos.y = height() - halfHeight
-    if (top < 0) player.pos.y = halfWidth
-
+        if (right > width()) player.pos.x = width() - halfWidth
+        if (left < 0) player.pos.x = halfWidth
+        if (bottom > height()) player.pos.y = height() - halfHeight
+        if (top < 0) player.pos.y = halfWidth
     }
-
 
 
     player.onUpdate(() => {
@@ -196,7 +196,6 @@ export default function setupCress(rounds: number) {
 
     const movePlayer = (direction: Vector) => {
         let speed = shooting ? SPEED * 0.3 : SPEED
-        console.log(shooting, speed)
         player.vel = player.vel.add(direction.scale(speed))
     }
 
@@ -275,15 +274,21 @@ export default function setupCress(rounds: number) {
         elapsedCharge = 0 
     })
 
+    let ammo = MAX_AMMO
+    let ammoRefreshTimer: TimerController | null = null
+    const AMMO_BAR_HEIGHT = height() / 4
+
     const SHOT_COOLDOWN = 150
     let lastShotTime = 0
     let shootOnLeftSide = false
     const CENTER_OFFSET = 22
     let shooting = false
-    onKeyDown(['z', '.'], () => {
-        shooting = true
-        if (!paused && stunFrames == 0 && !player.charged() && Date.now() - lastShotTime > SHOT_COOLDOWN) {
 
+    onKeyDown(['z', '.'], () => {
+        if (!paused && stunFrames == 0 && !player.charged() && ammo > 0 && Date.now() - lastShotTime > SHOT_COOLDOWN) {
+            shooting = true
+            ammo--
+            ammoBar.height = ammo / MAX_AMMO * AMMO_BAR_HEIGHT
             const data: ProjectileData = { 
                 type: 'cress laser',
                 sprite: 'cress bullet', 
@@ -299,7 +304,41 @@ export default function setupCress(rounds: number) {
             shootOnLeftSide = !shootOnLeftSide
             lastShotTime = Date.now()
         }
+
+        if (ammo == 0 && ammoRefreshTimer == null) {
+            shooting = false
+            ammoBar.tween(0, AMMO_BAR_HEIGHT, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
+            ammoBarOutline.animation.paused = false
+            ammoRefreshTimer = wait(AMMO_REFRESH_TIME, () => { 
+                ammo = MAX_AMMO
+                ammoRefreshTimer = null
+                ammoBarOutline.animation.paused = true
+                ammoBarOutline.opacity = 0.5
+            })
+        }
     })
+
+    // ammo bar outline
+    const ammoBarOutline = add([
+        rect(40, AMMO_BAR_HEIGHT, { fill: false }),
+        pos(width() - 10, height() - 10),
+        anchor('botright'),
+        outline(5, WHITE),
+        opacity(0.5),
+        animate()
+    ])
+    ammoBarOutline.animate('opacity', [0, 0.5], { duration: AMMO_REFRESH_TIME / 10, direction: 'ping-pong'})
+    ammoBarOutline.animation.paused = true
+
+    const ammoBar = add([
+        rect(40, AMMO_BAR_HEIGHT),
+        pos(width() - 10, height() - 10),
+        anchor('botright'),
+        color(BLUE),
+        opacity(0.5),
+        timer(),
+    ])
+
 
     setDataListener('projectilePositions', (data) => {
         for (let i = 0; i < data.pos.length; i++) {

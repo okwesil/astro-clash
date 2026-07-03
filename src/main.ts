@@ -6,13 +6,13 @@ import { setupTitle } from "./title"
 import { setupBackground } from "./background"
 
 kaplay({
-  width: 700,
-  height: 700,
+  width: 900,
+  height: 900,
   stretch: true,
   letterbox: true,
   crisp: true,
+  // @ts-ignore
 })
-
 console.log('main.ts loaded', window.location.href)
 
 export const ZLevels = [
