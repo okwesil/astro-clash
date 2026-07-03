@@ -80,7 +80,8 @@ export function createLaserCollisionParticles(position: Vector) {
     const particles = add([
         sprite('laser collide', { anim: 'expand', animSpeed: 2 }),
         pos(position),
-        scale(3)
+        scale(3),
+        anchor('center'),
     ])
     particles.onAnimEnd(() => particles.destroy())
 }

@@ -76,33 +76,33 @@ export default function setupCress(rounds: number) {
     let elapsedCharge = 0
 
     const player = add([
-    health(100, 100),
-    pos(startPos),
-    sprite('cress', {
-        anim: 'idle'
-    }),
-    color(),
-    area(),
-    rotate(angle),
-    scale(1.2),
-    z(ZLevels.indexOf('current player')),
-    anchor("center"),
-    opacity(1),
-    'current player',
-    'cress',
-    {
-        vel: vec2(),
-        knockbackVel: vec2(),
-        angleX: 0,
-        stun: (duration: number) => {
-        stunFrames = Math.min(duration, MAX_STUN)
+        health(100, 100),
+        pos(startPos),
+        sprite('cress', {
+            anim: 'idle'
+        }),
+        color(),
+        area(),
+        rotate(angle),
+        scale(1.2),
+        z(ZLevels.indexOf('current player')),
+        anchor("center"),
+        opacity(1),
+        'current player',
+        'cress',
+        {
+            vel: vec2(),
+            knockbackVel: vec2(),
+            angleX: 0,
+            stun: (duration: number) => {
+            stunFrames = Math.min(duration, MAX_STUN)
+            },
+            knockback: (direction: Vector, strength: number) => {
+            player.knockbackVel = player.knockbackVel.add(direction.scale(strength))
+            },
+            charged: () => elapsedCharge >= RAILGUN_CHARGE_TIME - 0.01,
+            otherPlayersPos: vec2()
         },
-        knockback: (direction: Vector, strength: number) => {
-        player.knockbackVel = player.knockbackVel.add(direction.scale(strength))
-        },
-        charged: () => elapsedCharge >= RAILGUN_CHARGE_TIME - 0.01,
-        otherPlayersPos: vec2()
-    },
     ])
 
     let stunFrames = 0
@@ -145,89 +145,90 @@ export default function setupCress(rounds: number) {
 
 
     player.onUpdate(() => {
-    if (paused) { player.vel = vec2(); return }
+        if (paused) { player.vel = vec2(); return }
 
-    player.vel = player.vel.add(player.knockbackVel)
-    player.move(player.vel)
-    player.vel = player.vel.scale(FRICTION)
-    player.knockbackVel = player.knockbackVel.scale(KNOCKBACK_FRICTION)
+        player.vel = player.vel.add(player.knockbackVel)
+        player.move(player.vel)
+        player.vel = player.vel.scale(FRICTION)
+        player.knockbackVel = player.knockbackVel.scale(KNOCKBACK_FRICTION)
 
-    keepPlayerOnScreen()
+        keepPlayerOnScreen()
 
-    if (elapsedCharge == 0) {
-        player.angle = angleBetween(player.pos, player.otherPlayersPos)
-    }
+        if (elapsedCharge == 0) {
+            player.angle = angleBetween(player.pos, player.otherPlayersPos)
+        }
 
-    if (blinking) {
-        player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
-    }
+        if (blinking) {
+            player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) +  1), 1)
+        }
 
-    if (stunFrames > 0) {
-        stunFrames--
-        send('stunFrames', { frames: stunFrames })
-        elapsedCharge = 0
-    }
+        if (stunFrames > 0) {
+            stunFrames--
+            send('stunFrames', { frames: stunFrames })
+            elapsedCharge = 0
+        }
 
-    if (Math.abs(player.vel.x) > 0.2) {
-        if (player.getCurAnim()?.name != 'thruster') {
-        player.play('thruster')
-        } 
-    } else {
-        if (player.getCurAnim()?.name != 'idle') {
-        player.play('idle')
-        } 
-    }
+        if (Math.abs(player.vel.x) > 0.2) {
+            if (player.getCurAnim()?.name != 'thruster') {
+            player.play('thruster')
+            } 
+        } else {
+            if (player.getCurAnim()?.name != 'idle') {
+            player.play('idle')
+            } 
+        }
 
-    if (Math.floor(player.pos.x) == Math.floor(lastPos.x) && Math.floor(player.pos.y) == Math.floor(lastPos.y)) return
-    send('movement',  player.pos)
-    lastPos = player.pos
+        if (Math.floor(player.pos.x) == Math.floor(lastPos.x) && Math.floor(player.pos.y) == Math.floor(lastPos.y)) return
+        send('movement',  player.pos)
+        lastPos = player.pos
     })
 
     player.onDraw(() => {
-    if (stunFrames > 0) {
-        drawStunCircle(vec2(), player.width + 3, stunFrames)
-    }
-    if (elapsedCharge > 0) {
-        drawChargeCircle(vec2(), player.width + 3, elapsedCharge / RAILGUN_CHARGE_TIME)
-        drawRailgunAimingLine(vec2(), 0, elapsedCharge / RAILGUN_CHARGE_TIME)
-    }
+        if (stunFrames > 0) {
+            drawStunCircle(vec2(), player.width + 3, stunFrames)
+        }
+        if (elapsedCharge > 0) {
+            drawChargeCircle(vec2(), player.width + 3, elapsedCharge / RAILGUN_CHARGE_TIME)
+            drawRailgunAimingLine(vec2(), 0, elapsedCharge / RAILGUN_CHARGE_TIME)
+        }
     })
 
 
     const movePlayer = (direction: Vector) => {
-    let speed = shooting ? SPEED * 0.8 : SPEED
-    player.vel = player.vel.add(direction.scale(speed))
+        let speed = shooting ? SPEED * 0.3 : SPEED
+        console.log(shooting, speed)
+        player.vel = player.vel.add(direction.scale(speed))
     }
 
     onKeyDown(['w', 'up'], () => {
-    if (stunFrames > 0 || elapsedCharge != 0) return
-    movePlayer(vec2(0, -1))
+        if (stunFrames > 0 || elapsedCharge != 0) return
+        movePlayer(vec2(0, -1))
     })
     onKeyDown(['s', 'down'], () => {
-    if (stunFrames > 0 || elapsedCharge != 0) return
-    movePlayer(vec2(0, 1))
+        if (stunFrames > 0 || elapsedCharge != 0) return
+        movePlayer(vec2(0, 1))
     })
     onKeyDown(['a', 'left'], () => {
-    if (stunFrames > 0) return
+        if (stunFrames > 0) return
 
-    if (elapsedCharge != 0) {
-        player.angle -= 1
-        send('aimingRailgun', { angle: player.angle})
-        return
-    }
+        if (elapsedCharge != 0) {
+            player.angle -= 1
+            send('aimingRailgun', { angle: player.angle})
+            return
+        }
 
-    movePlayer(vec2(-1, 0))
+        movePlayer(vec2(-1, 0))
     })
     onKeyDown(['d', 'right'], () => {
-    if (stunFrames > 0) return
+        if (stunFrames > 0) return
 
-    if (elapsedCharge != 0) {
-        player.angle += 1
-        send('aimingRailgun', { angle: player.angle })
-        return
-    }
+        if (elapsedCharge != 0) {
+            player.angle += 1
+            send('aimingRailgun', { angle: player.angle })
+            return
+        }
 
-    movePlayer(vec2(1, 0))
+        movePlayer(vec2(1, 0))
     })
 
     let alreadySentFullCompletion = false
@@ -300,11 +301,18 @@ export default function setupCress(rounds: number) {
         }
     })
 
-    setDataListener('projectilePos', (data) => [
-        query({ include: ['friendly projectile', `${data.projId}`] }).forEach(proj => {
-            proj.targetPos = vec2(data.pos.x, data.pos.y)
-        })
-    ])
+    setDataListener('projectilePositions', (data) => {
+        for (let i = 0; i < data.pos.length; i++) {
+            const proj = query({ include: data.projId[i] })[0]
+            if (!proj) continue
+            proj.targetPos.x = data.pos[i].x 
+            proj.targetPos.y = data.pos[i].y 
+        }
+    })
+
+    onUpdate('friendly projectile', (proj) => {
+        proj.pos = lerp(proj.pos, proj.targetPos, 0.9)
+    })
 
     onKeyRelease(['z'], () => {
         shooting = false

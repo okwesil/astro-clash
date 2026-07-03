@@ -47,17 +47,16 @@ export default function setupOtherCress(rounds: number) {
         player.pos = lerp(player.pos, player.targetPos, 0.8)
     })
 
-  player.onDraw(() => {
-    if (railgunChargeCompletion > 0) {
-        drawRailgunAimingLine(vec2(), 0, railgunChargeCompletion)
-        drawChargeCircle(vec2(), player.width, railgunChargeCompletion)
-    }
+    player.onDraw(() => {
+        if (railgunChargeCompletion > 0) {
+            drawRailgunAimingLine(vec2(), 0, railgunChargeCompletion)
+            drawChargeCircle(vec2(), player.width, railgunChargeCompletion)
+        }
 
-    if (stunFrames > 0) {
-      drawStunCircle(vec2(), player.width, stunFrames)
-    }
-
-  })
+        if (stunFrames > 0) {
+            drawStunCircle(vec2(), player.width, stunFrames)
+        }
+    })
 
     setDataListener('movement', (data) => {
         player.targetPos.x = data.x

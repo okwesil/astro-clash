@@ -76,9 +76,9 @@ async function game(reset: boolean) {
 
 
     setDataListener('reasonForDisconnect', ({ reason }) => closeConnection( reason ))
-    setDataListener('all', (packet) => {
-        // console.log(packet)
-    })
+    // setDataListener('all', (packet) => {
+    //     console.log(packet)
+    // })
 
 
     setupBackground()
@@ -115,12 +115,9 @@ async function game(reset: boolean) {
         send('deleteProjectiles', { projIds: [ a.projId, b.projId ]})
     })
 
-    onUpdate('friendly projectile', (proj) => {
-        proj.pos = lerp(proj.pos, proj.targetPos, 0.9)
-    })
-
-    onUpdate('enemy projectile', (proj) => {
-        send('projectilePos', { pos: proj.pos, projId: proj.projId })
+    onUpdate(() => {
+        const projs = query({ include: 'enemy projectile' })
+        send('projectilePositions', { pos: projs.map(proj => proj.pos), projId: projs.map(proj => proj.projId) })
     })
     
     // TODO: fix bug where if both players death at the same time, both get credited a loss

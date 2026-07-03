@@ -101,7 +101,7 @@ type PacketMap = {
     all: Packet
     movement: Vec2
     projectileShot: ProjectileData
-    projectilePos: { pos: Vector, projId: string }
+    projectilePositions: { pos: Vector[], projId: string[] }
     deleteProjectiles: { projIds: string[] }
     death: { hostWon: boolean; roundDied: number }
     healthChange: { maxHP: number, currentValue: number }
@@ -130,7 +130,7 @@ export const listeners: ListenerMap = {
     ping: () => {},
     movement: () => {},
     projectileShot: () => {},
-    projectilePos: () => {},
+    projectilePositions: () => {},
     deleteProjectiles: () => {},
     death: () => {},
     healthChange: () => {},
