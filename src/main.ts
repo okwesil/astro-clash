@@ -148,6 +148,20 @@ export async function transition(scene: string, ...args: any[]) {
   }, 100)
 }
 
+const fpsVisual = add([
+  text(debug.fps().toString(), {
+    size: 20,
+    font: 'pixel'
+  }),
+  pos(vec2(20)),
+  stay(),
+  {
+    update: () => {
+      fpsVisual.text = debug.fps().toString()
+    }
+  }
+])
+
 setupBackground()
 setupTitle()
 setupMenu()

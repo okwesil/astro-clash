@@ -27,6 +27,7 @@ export default function setupOtherCress(rounds: number) {
         opacity(1),
         'cress',
         {
+            targetPos: startPos,
             otherPlayersPos: vec2(),
             blinking: false,
             blinkingFrequency: 8
@@ -42,6 +43,8 @@ export default function setupOtherCress(rounds: number) {
         if (autoaim) {
             player.angle = angleBetween(player.pos, player.otherPlayersPos)
         }
+
+        player.pos = lerp(player.pos, player.targetPos, 0.8)
     })
 
   player.onDraw(() => {
@@ -57,8 +60,8 @@ export default function setupOtherCress(rounds: number) {
   })
 
     setDataListener('movement', (data) => {
-        player.pos.x = data.x
-        player.pos.y = data.y
+        player.targetPos.x = data.x
+        player.targetPos.y = data.y
     })
 
     setDataListener('projectileShot', (data) => {

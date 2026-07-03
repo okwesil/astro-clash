@@ -39,13 +39,14 @@ export function shoot(data: ProjectileData, createdByCurrPlayer: boolean) {
     const proj = add([
         sprite(data.sprite + (!createdByCurrPlayer ? ' blue' : '' )),
         pos(data.pos.x, data.pos.y),
-        area(),
+        area({ scale: 1.2 }),
         rotate(data.direction),
         anchor('center'),
         offscreen({ destroy: true }),
         scale(1.5),
         (!createdByCurrPlayer ? 'enemy projectile' : 'friendly projectile'),
         'projectile',
+        `${data.projId}`,
         {
             projId: data.projId,
             type: data.type,
@@ -55,6 +56,12 @@ export function shoot(data: ProjectileData, createdByCurrPlayer: boolean) {
             targetPos: data.pos
         }
     ])
+
+    // add([
+    //     text(data.projId),
+    //     pos(), follow(proj, vec2(10, 0)),
+    //     anchor('left')
+    // ])
 
     play(data.sound, {
         volume: 0.1

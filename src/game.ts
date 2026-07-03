@@ -77,7 +77,7 @@ async function game(reset: boolean) {
 
     setDataListener('reasonForDisconnect', ({ reason }) => closeConnection( reason ))
     setDataListener('all', (packet) => {
-        console.log(packet)
+        // console.log(packet)
     })
 
 
@@ -89,7 +89,7 @@ async function game(reset: boolean) {
         // @ts-ignore
         projFunctions[proj.type].onHit(player, proj)
         createLaserCollisionParticles(proj.pos)
-        send('deleteProjectile', proj.projId)
+        send('deleteProjectiles', { projIds: [ proj.projId ] })
         proj.destroy()
     })
 
@@ -97,32 +97,32 @@ async function game(reset: boolean) {
         wait(0.1, () =>  player.hurt(100))
     })
 
-    onUpdate('enemy projectile', (proj) => {
-        send('projectilePos', { pos: proj.pos, projId: proj.projId })
-    })
-
-    setDataListener('deleteProjectile', ({ projId }) => {
-        query({ include: 'friendly projectile' }).forEach(proj => {
-            if (proj.projId == projId) proj.destroy()
+    
+    setDataListener('deleteProjectiles', ({ projIds }) => {
+        query({ include: [ ...projIds ], includeOp: 'or' }).forEach(proj => {
+            proj.destroy()
         })
     })
-
+    
     otherPlayer.onCollide('friendly projectile', (proj) => {
-        proj.destroy()
         createLaserCollisionParticles(proj.pos)
     })
-
+    
     onCollide('enemy projectile', 'friendly projectile', (a, b) => {
-        send('deleteProjectile', a.projId)
-        createLaserCollisionParticles(a.pos)
         a.destroy()
         b.destroy()
+        createLaserCollisionParticles(a.pos)
+        send('deleteProjectiles', { projIds: [ a.projId, b.projId ]})
     })
 
     onUpdate('friendly projectile', (proj) => {
-        proj.pos = lerp(proj.pos, proj.targetPos, 0.5)
+        proj.pos = lerp(proj.pos, proj.targetPos, 0.9)
     })
 
+    onUpdate('enemy projectile', (proj) => {
+        send('projectilePos', { pos: proj.pos, projId: proj.projId })
+    })
+    
     // TODO: fix bug where if both players death at the same time, both get credited a loss
     player.onDeath(() => {
         paused = true
@@ -187,9 +187,6 @@ async function game(reset: boolean) {
     onUpdate(() => {
         player.otherPlayersPos = otherPlayer.pos
         otherPlayer.otherPlayersPos = player.pos
-
-        // fps visualizer
-        drawText({ text: 'FPS: ' + debug.fps().toString(), size: 20, pos: vec2(20, 20), font: 'pixel' })
         
         drawScoreboard(playerScore, otherPlayerScore)
     })
