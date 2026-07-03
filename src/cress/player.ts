@@ -65,8 +65,8 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
   shake(50)
 }
 
-const MAX_AMMO = 20
-const AMMO_REFRESH_TIME = 2
+export const MAX_AMMO = 20
+export const AMMO_REFRESH_TIME = 2
 export default function setupCress(rounds: number) {
     const SPEED = 80
     const FRICTION = 0.8
@@ -300,7 +300,7 @@ export default function setupCress(rounds: number) {
                 projId: randi(100000).toString()
             }
 
-            shoot(data, true)
+            shoot(data, true, ammo)
             shootOnLeftSide = !shootOnLeftSide
             lastShotTime = Date.now()
         }
@@ -318,6 +318,11 @@ export default function setupCress(rounds: number) {
         }
     })
 
+    onKeyRelease(['z'], () => {
+        shooting = false
+    })
+
+
     // ammo bar outline
     const ammoBarOutline = add([
         rect(40, AMMO_BAR_HEIGHT, { fill: false }),
@@ -327,6 +332,7 @@ export default function setupCress(rounds: number) {
         opacity(0.5),
         animate()
     ])
+
     ammoBarOutline.animate('opacity', [0, 0.5], { duration: AMMO_REFRESH_TIME / 10, direction: 'ping-pong'})
     ammoBarOutline.animation.paused = true
 
@@ -352,10 +358,5 @@ export default function setupCress(rounds: number) {
     onUpdate('friendly projectile', (proj) => {
         proj.pos = lerp(proj.pos, proj.targetPos, 0.9)
     })
-
-    onKeyRelease(['z'], () => {
-        shooting = false
-    })
-
     return player
 }

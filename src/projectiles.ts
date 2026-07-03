@@ -1,3 +1,4 @@
+import type { AnchorComp, AreaComp, GameObj, OffScreenComp, PosComp, RotateComp, ScaleComp, SpriteComp } from "kaplay"
 import type { Vector } from "./game"
 import { send } from "./network"
 import type { setupPlayer } from "./player"
@@ -33,9 +34,16 @@ export const projFunctions: Record<ProjectileType, { update: updateFunction, onH
     }
 }
 
-export type ProjectileObject = ReturnType<typeof shoot>
+export type ProjectileObject = GameObj<SpriteComp | PosComp | AreaComp | RotateComp | AnchorComp | OffScreenComp | ScaleComp | {
+    projId: string;
+    type: "cress laser";
+    speed: number;
+    direction: number;
+    damage: number;
+    targetPos: Vector;
+}>
 
-export function shoot(data: ProjectileData, createdByCurrPlayer: boolean) {
+export function shoot(data: ProjectileData, createdByCurrPlayer: boolean, newAmmo: number): ProjectileObject {
     const proj = add([
         sprite(data.sprite + (!createdByCurrPlayer ? ' blue' : '' )),
         pos(data.pos.x, data.pos.y),
@@ -68,12 +76,13 @@ export function shoot(data: ProjectileData, createdByCurrPlayer: boolean) {
     })
     
     if (createdByCurrPlayer) {
-        send('projectileShot', data)
+        send('projectileShot', { data, newAmmo })
     }
 
     proj.onUpdate(() => {
         projFunctions[proj.type].update(proj, !createdByCurrPlayer)
     })
+
     return proj
 }
 export function createLaserCollisionParticles(position: Vector) {

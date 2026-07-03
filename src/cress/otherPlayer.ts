@@ -1,7 +1,7 @@
 import { angleBetween } from "../game"
 import { ZLevels } from "../main"
 import { setDataListener, isHost } from "../network"
-import { drawChargeCircle, drawRailgunAimingLine, fireRailgun } from "./player"
+import { AMMO_REFRESH_TIME, drawChargeCircle, drawRailgunAimingLine, fireRailgun, MAX_AMMO } from "./player"
 import { shoot } from "../projectiles"
 import { drawStunCircle } from "../player"
 
@@ -63,9 +63,24 @@ export default function setupOtherCress(rounds: number) {
         player.targetPos.y = data.y
     })
 
+    const ammoBar = add([
+        rect(10, player.height),
+        pos(), follow(player, vec2(-40, (player.height / 2))),
+        anchor('botleft'),
+        color(BLUE),
+        timer()
+    ])
+
     setDataListener('projectileShot', (data) => {
-        shoot(data, false)
+        if (data.newAmmo > 0) {
+            ammoBar.height = data.newAmmo / MAX_AMMO * player.height
+        } else {
+            ammoBar.tween(0, player.height, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
+        }
+
+        shoot(data.data, false, -1)
     })
+
 
     let stunFrames = 0
     setDataListener('stunFrames', ({ frames }) => {

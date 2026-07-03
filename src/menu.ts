@@ -1,4 +1,4 @@
-import { setupBackground } from './background'
+import { BG_COLOR, setupBackground } from './background'
 import { transition, ZLevels } from './main'
 import { connect, peerId, setConnectionListener, setOnError } from './network'
 
@@ -40,7 +40,7 @@ function menu(reason: string | undefined) {
         rect(500, 40),
         anchor('center'),
         pos(center()),
-        color(BLACK),
+        color(BG_COLOR),
         z(ZLevels.indexOf('menu text background'))
     ])
     const input = add([

@@ -30,8 +30,9 @@ function fillScreenWithStars() {
     }
 }
 
+export const BG_COLOR = '#05050c'
 export function setupBackground() {
-    setBackground(BLACK)
+    setBackground(BG_COLOR as any)
     fillScreenWithStars()
 
     

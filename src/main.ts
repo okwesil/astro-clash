@@ -3,7 +3,7 @@ import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
 import { setupTitle } from "./title"
-import { setupBackground } from "./background"
+import { BG_COLOR, setupBackground } from "./background"
 
 kaplay({
   width: 900,
@@ -135,7 +135,7 @@ export async function transition(scene: string, ...args: any[]) {
     z(100000),
     timer(),
     stay(),
-    color(BLACK)
+    color(BG_COLOR)
   ])
 
   rectangle.tween(-rectangle.width, 0, TRANSITION_DURATION, (value) => (rectangle.pos.x = value))

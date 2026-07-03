@@ -100,7 +100,7 @@ type PacketMap = {
     ping: null
     all: Packet
     movement: Vec2
-    projectileShot: ProjectileData
+    projectileShot: { data: ProjectileData, newAmmo: number }
     projectilePositions: { pos: Vector[], projId: string[] }
     deleteProjectiles: { projIds: string[] }
     death: { hostWon: boolean; roundDied: number }
