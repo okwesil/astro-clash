@@ -12,7 +12,7 @@ export function setupGame() {
 
 export type Vector = ReturnType<typeof vec2>
 export function angleBetween(p1: Vector, p2: Vector): number {
-    const [ dx, dy ] = [ p2.x - p1.x, p2.y - p1.y ]
+    const [dx, dy] = [p2.x - p1.x, p2.y - p1.y]
     return Math.atan2(dy, dx) / (2 * Math.PI) * 360 + 90
 }
 
@@ -79,9 +79,9 @@ async function game(reset: boolean) {
         pos(0, 0),
         outline(4, WHITE, 0.1),
     ])
-    
 
-    setDataListener('reasonForDisconnect', ({ reason }) => closeConnection( reason ))
+
+    setDataListener('reasonForDisconnect', ({ reason }) => closeConnection(reason))
     // setDataListener('all', (packet) => {
     //     console.log(packet)
     // })
@@ -96,20 +96,20 @@ async function game(reset: boolean) {
         // @ts-ignore
         projFunctions[proj.type].onHit(player, proj)
         createLaserCollisionParticles(proj.pos)
-        send('deleteProjectiles', { projIds: [ proj.projId ] })
+        send('deleteProjectiles', { projIds: [proj.projId] })
         proj.destroy()
     })
 
     player.onCollide('enemy railgun', (railgun) => {
-        wait(0.2, () =>  {
+        wait(0.2, () => {
             player.hurt(70)
             player.knockback(Vec2.fromAngle(railgun.angle + 90 + randi(-60, 60)), 1300)
-            new Trail(player, 100, 500, 1)
+            new Trail(player, 100, 500, 0.5)
         })
     })
 
     otherPlayer.onCollide('friendly railgun', () => {
-        new Trail(otherPlayer, 100, 500, 2)
+        new Trail(otherPlayer, 100, 500, 0.5)
     })
 
     onCollide('player', 'ui', (_, ui) => {
@@ -121,27 +121,27 @@ async function game(reset: boolean) {
     })
 
     setDataListener('deleteProjectiles', ({ projIds }) => {
-        query({ include: [ ...projIds ], includeOp: 'or' }).forEach(proj => {
+        query({ include: [...projIds], includeOp: 'or' }).forEach(proj => {
             proj.destroy()
         })
     })
-    
+
     otherPlayer.onCollide('friendly projectile', (proj) => {
         createLaserCollisionParticles(proj.pos)
     })
-    
+
     onCollide('enemy projectile', 'friendly projectile', (a, b) => {
         a.destroy()
         b.destroy()
         createLaserCollisionParticles(a.pos)
-        send('deleteProjectiles', { projIds: [ a.projId, b.projId ]})
+        send('deleteProjectiles', { projIds: [a.projId, b.projId] })
     })
 
     onUpdate(() => {
         const projs = query({ include: 'enemy projectile' })
         send('projectilePositions', { pos: projs.map(proj => proj.pos), projId: projs.map(proj => proj.projId) })
     })
-    
+
     // TODO: fix bug where if both players death at the same time, both get credited a loss
     player.onDeath(() => {
         paused = true
@@ -180,7 +180,7 @@ async function game(reset: boolean) {
     wait(2, () => {
         arrow.destroy()
     })
-    
+
     const playerScore = isHost ? score.host : score.other
     const otherPlayerScore = isHost ? score.other : score.host
     // crown 
@@ -201,11 +201,11 @@ async function game(reset: boolean) {
         })
         wait(3, () => crown.destroy())
     }
-    
+
     onUpdate(() => {
         player.otherPlayersPos = otherPlayer.pos
         otherPlayer.otherPlayersPos = player.pos
-        
+
         drawScoreboard(playerScore, otherPlayerScore)
     })
 
@@ -217,14 +217,15 @@ async function game(reset: boolean) {
         timePingWasSent = performance.now()
     })
     setDataListener('ping', () => {
-        if (!sentPing) { 
-            send('ping', null) 
+        if (!sentPing) {
+            send('ping', null)
         } else {
             debug.log(`${performance.now() - timePingWasSent}ms`)
             debug.log(`are you 'host': ${isHost ? 'yes' : 'no'}`)
             debug.log(`round ${rounds}`)
             debug.log(`host: ${score.host} other: ${score.other}`)
             debug.log(`objects: ${debug.numObjects()}`)
+
             sentPing = false
         }
     })
@@ -240,10 +241,10 @@ async function game(reset: boolean) {
             opacity(1),
             animate()
         ])
-    
+
         for (let i = start - 1; i >= 0; i--) {
             await wait(0.4)
-            countdown.animate('opacity', [0, 1], { duration: 0.4 })            
+            countdown.animate('opacity', [0, 1], { duration: 0.4 })
             countdown.text = i.toString()
         }
 
@@ -253,7 +254,7 @@ async function game(reset: boolean) {
         })
         paused = false
     }
-    
+
     async function showWin(hostWon: boolean) {
         paused = true
         const loseText = [
@@ -282,6 +283,6 @@ async function game(reset: boolean) {
             textObject.destroy()
             transition('game', false)
         })
-        
+
     }
 }

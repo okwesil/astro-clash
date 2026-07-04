@@ -11,7 +11,6 @@ kaplay({
     stretch: true,
     letterbox: true,
     crisp: true,
-    // @ts-ignore
 })
 console.log('main.ts loaded', window.location.href)
 
@@ -27,9 +26,9 @@ export const ZLevels = [
     'win text'
 ]
 
-
 loadFont('pixel', '/assets/Minecraft.ttf')
 loadSprite('star', '/assets/star.png')
+loadSprite('ringed planet', '/assets/ringed planet.png')
 loadSprite('shooting star', '/assets/shooting star.png', {
     sliceX: 4,
     sliceY: 1,
