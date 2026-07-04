@@ -26,6 +26,8 @@ function boom(position: Vector) {
         pos(position),
         anchor('center'),
     ])
+
+    play('boom')
 }
 
 let rounds = 1

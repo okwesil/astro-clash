@@ -27,8 +27,34 @@ export const ZLevels = [
 ]
 
 loadFont('pixel', '/assets/Minecraft.ttf')
-loadSprite('star', '/assets/star.png')
-loadSprite('ringed planet', '/assets/ringed planet.png')
+
+const singleSprites: { name: string, path: string }[] = [
+    { name: 'arrow', path: '/assets/arrow.png' },
+    { name: 'logo', path: '/assets/logo.png' },
+    { name: 'cress bullet', path: '/assets/cress/cress-bullet.png' },
+    { name: 'cress bullet blue', path: '/assets/cress/cress-bullet-blue.png' },
+    { name: 'crown', path: '/assets/red-crown.png' },
+    { name: 'crown blue', path: '/assets/blue-crown.png' },
+    { name: 'star', path: '/assets/star.png' },
+    { name: 'ringed planet', path: '/assets/ringed planet.png' },
+]
+
+const sounds: { name: string, path: string }[] = [
+    { name: 'laser sound', path: '/assets/cress/laser-sfx.mp3' },
+    { name: 'railgun charging', path: '/assets/cress/railgun-charging.mp3' },
+    { name: 'railgun firing', path: '/assets/cress/railgun-fire.mp3' },
+    { name: 'boom', path: '/assets/boom.mp3' }
+]
+
+for (const sprite of singleSprites) {
+    loadSprite(sprite.name, sprite.path)
+}
+
+for (const sound of sounds) {
+    loadSound(sound.name, sound.path)
+}
+
+
 loadSprite('shooting star', '/assets/shooting star.png', {
     sliceX: 4,
     sliceY: 1,
@@ -41,16 +67,7 @@ loadSprite('shooting star', '/assets/shooting star.png', {
     }
 })
 
-loadSprite('arrow', '/assets/arrow.png')
-loadSprite('logo', '/assets/logo.png')
 
-
-loadSprite('crown', '/assets/red-crown.png')
-loadSprite('crown blue', '/assets/blue-crown.png')
-
-loadSound('laser sound', '/assets/cress/laser-sfx.mp3')
-loadSound('railgun charging', '/assets/cress/railgun-charging.mp3')
-loadSound('railgun firing', '/assets/cress/railgun-fire.mp3')
 
 loadSprite('cress', '/assets/cress/cress.png', {
     sliceX: 4,
@@ -84,8 +101,6 @@ loadSprite('cress blue', '/assets/cress/cress-blue.png', {
     }
 })
 
-loadSprite('cress bullet', '/assets/cress/cress-bullet.png')
-loadSprite('cress bullet blue', '/assets/cress/cress-bullet-blue.png')
 
 loadSprite('laser collide', '/assets/laser-collision.png', {
     sliceX: 2,
