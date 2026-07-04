@@ -255,7 +255,6 @@ export default function setupCress(rounds: number) {
     })
 
 
-    let firstFrameOfTurning = true
     const turnPlayer = (direction: 1 | -1) => {
         player.angle += direction
     }
@@ -285,7 +284,6 @@ export default function setupCress(rounds: number) {
     })
 
     onKeyRelease(['a', 'left', 'd', 'right'], () => {
-        firstFrameOfTurning = true
         player.angularSpeed = 0
     })
 

@@ -88,15 +88,16 @@ function createShootingStar() {
 function createPlanet() {
     const [position, side] = randomPosOnSideOfScreen()
     const angle = angleTowardsScreen(side)
+    const planet = choose('ringed planet', 'base planet')
     add([
-        sprite('ringed planet'),
+        sprite(planet),
         pos(position),
         anchor('right'),
         offscreen({ destroy: true, distance: 100 }),
         z(ZLevels.indexOf('stars')),
         rotate(rand(-30, 30)),
-        scale(10),
-        opacity(0.1),
+        scale(rand(1, 5)),
+        opacity(0.80),
         move(Vec2.fromAngle(angle), 80)
     ])
 }
