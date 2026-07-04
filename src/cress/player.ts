@@ -256,29 +256,14 @@ export default function setupCress(rounds: number) {
 
 
     let firstFrameOfTurning = true
-    const turnPlayer = (side: 'left' | 'right') => {
-        if (!firstFrameOfTurning) {
-            if (side != player.turningDirection) {
-                player.turningDirection = side
-                player.angularSpeed *= -1
-            }
-            return
-        }
-        firstFrameOfTurning = false
-        let normalizedAngle = player.angle % 360
-        if (normalizedAngle < 0) normalizedAngle += 360
-
-        let direction = side == 'left' ? -1 : 1
-        if (normalizedAngle > 90 && normalizedAngle < 270) direction *= -1
-        player.angularSpeed = direction
-        player.turningDirection = side
+    const turnPlayer = (direction: 1 | -1) => {
+      player.angle += direction
     }
 
     onKeyDown(['a', 'left'], () => {
-        if (stunFrames > 0) return
 
         if (elapsedCharge != 0) {
-            turnPlayer('left')
+            turnPlayer(-1)
             send('aimingRailgun', { angle: player.angle})
             return
         }
@@ -289,7 +274,7 @@ export default function setupCress(rounds: number) {
         if (stunFrames > 0) return
 
         if (elapsedCharge != 0) {
-            turnPlayer('right')
+            turnPlayer(1)
             send('aimingRailgun', { angle: player.angle })
             return
         }
@@ -312,7 +297,6 @@ export default function setupCress(rounds: number) {
         if (paused) return
         elapsedCharge += dt()
         if (player.charged()) elapsedCharge = RAILGUN_CHARGE_TIME
-        
         if (!player.charged()) {
             if (!alreadyPlaying && firstFrameOfCharge && railgunAudio) {
                 railgunAudio.volume = 0.05
@@ -395,7 +379,6 @@ export default function setupCress(rounds: number) {
     onKeyRelease(['z'], () => {
         shooting = false
     })
-
 
     // ammo bar outline
     const ammoBarOutline = add([

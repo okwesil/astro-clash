@@ -1,20 +1,47 @@
 import type { AnchorComp, GameObj, PosComp, RotateComp, ScaleComp, SpriteComp } from "kaplay"
 import type { Vector } from "./game"
+import { ZLevels } from "./main"
 
 type Star = {
     pos: Vector,
     scale: number,
     velocity: Vector
+    shooting: boolean
 }
+
 let stars: Star[] = []
 
 function createStar() {
+    // 30% chance of making a shooting star
     const star: Star = {
         pos: rand(vec2(width(), height())),
         scale: rand(0.3, 2),
-        velocity: Vec2.fromAngle(rand(360)).scale(rand(0.01, 0.5))
+        velocity: Vec2.fromAngle(rand(360)).scale(rand(0.01, 0.2)),
+        shooting: false
     }
     stars.push(star)
+}
+
+function createShootingStar() {
+    const angle = 180 + rand(-40, 40)
+    const star = add([
+        sprite('shooting star', { anim: 'fly' }),
+        pos(width(), rand(height())),
+        anchor('left'),
+        offscreen({ destroy: true, distance: 300 }),
+        z(ZLevels.indexOf('stars')),
+        rotate(angle + 180),
+        opacity(rand(0.1, 0.8)),
+        scale(3),
+        {
+            vel: Vec2.fromAngle(angle).scale(10)
+        }
+    ])
+
+
+    star.onUpdate(() => {
+        star.pos = star.pos.add(star.vel)
+    })
 }
 
 function isOffscreen(point: Vector): boolean {
@@ -36,14 +63,29 @@ export function setupBackground() {
     setBackground(BG_COLOR as any)
     fillScreenWithStars()
 
+
+    let timeSinceShootingStar = 0
     onUpdate(() => {
         let starsToReAdd = 0
+        timeSinceShootingStar += dt()
+
+        if (timeSinceShootingStar > 5) {
+            if (randi(0, 9) < 3) {
+                createShootingStar()
+                createShootingStar()
+            } else {
+                createShootingStar()
+            }
+
+            timeSinceShootingStar = 0
+        }
+
         stars = stars.filter((star) => {
             star.pos = star.pos.add(star.velocity)
 
             const offscreen = isOffscreen(star.pos)
             if (offscreen) starsToReAdd++
-            
+
             return !offscreen
         })
 
@@ -55,6 +97,7 @@ export function setupBackground() {
             trail.update()
         }
     })
+
 
     onSceneLeave(() => { fillScreenWithStars(); trails = [] })
 
