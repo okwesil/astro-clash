@@ -50,7 +50,7 @@ function title() {
     ])
 
     rectangle.onClick(() => {
-        musicPlayer.playASong()
+        musicPlayer.startMusic()
         transition('menu')
     })
 

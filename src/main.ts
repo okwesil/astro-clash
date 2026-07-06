@@ -79,7 +79,11 @@ class MusicPlayer {
     }
 
     resume() {
-        if (!this.audioHandle || this.isPlaying) return
+        if (this.isPlaying) return
+        if (!this.audioHandle) {
+            this.playASong()
+            return
+        }
         this.isPlaying = true
         this.audioHandle.paused = false
     }
@@ -87,10 +91,18 @@ class MusicPlayer {
     set isPlaying(playing: boolean) {
         this.#isPlaying = playing
         if (this.onChangeState) this.onChangeState(playing, this.song)
+        if (playing) localStorage.setItem('audio paused', 'false')
+        else localStorage.setItem('audio paused', 'true')
     }
 
     get isPlaying(): boolean {
         return this.#isPlaying
+    }
+
+    startMusic() {
+        console.log(localStorage.getItem('audio paused'))
+        if (localStorage.getItem('audio paused') == 'true') return
+        this.playASong()
     }
 
     playASong = () => {

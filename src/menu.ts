@@ -24,18 +24,22 @@ function menu(reason: string | undefined) {
 
     const songText = add([
         text(musicPlayer.song, { size: 30, font: 'pixel' }),
-        pos(soundToggle.pos.x + soundToggle.width + 10, height() - 15),
+        pos(soundToggle.pos.x + soundToggle.width + 10, height() + 40),
         anchor('botleft'),
         z(ZLevels.indexOf('ui')),
+        timer()
     ])
 
     soundToggle.tween(height() + soundToggle.height, height() - 10, 0.3, (value) => (soundToggle.pos.y = value))
 
+
     musicPlayer.onChangeState = (isPlaying, song) => {
         if (isPlaying) {
             soundToggle.sprite = 'sound on'
+            songText.tween(height() + songText.height, height() - 15, 0.3, (value) => (songText.pos.y = value))
         } else {
             soundToggle.sprite = 'sound off'
+            songText.tween(height() - 15, height() + songText.height, 0.3, (value) => (songText.pos.y = value))
         }
         songText.text = song
     }
