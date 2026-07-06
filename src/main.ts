@@ -1,4 +1,4 @@
-import kaplay from "kaplay"
+import kaplay, { type AudioPlay } from "kaplay"
 import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
@@ -16,14 +16,13 @@ console.log('main.ts loaded', window.location.href)
 
 export const ZLevels = [
     'stars',
-    'menu text background',
-    'menu text',
     'healthbar',
     'other player',
     'current player',
     'laser',
     'railgun',
-    'win text'
+    'win text',
+    'ui'
 ]
 
 loadFont('pixel', '/assets/Minecraft.ttf')
@@ -37,23 +36,102 @@ const singleSprites: { name: string, path: string }[] = [
     { name: 'crown blue', path: '/assets/blue-crown.png' },
     { name: 'star', path: '/assets/star.png' },
     { name: 'ringed planet', path: '/assets/ringed planet.png' },
-    { name: 'base planet', path: '/assets/base planet.png' }
+    { name: 'base planet', path: '/assets/base planet.png' },
+    { name: 'sound on', path: '/assets/sound on.png' },
+    { name: 'sound off', path: '/assets/sound off.png' },
 ]
 
 const sounds: { name: string, path: string }[] = [
-    { name: 'laser sound', path: '/assets/cress/laser-sfx.mp3' },
-    { name: 'railgun charging', path: '/assets/cress/railgun-charging.mp3' },
-    { name: 'railgun firing', path: '/assets/cress/railgun-fire.mp3' },
-    { name: 'boom', path: '/assets/boom.mp3' }
+    { name: 'laser sound', path: 'assets/cress/sounds/laser-sfx.mp3' },
+    { name: 'railgun charging', path: 'assets/cress/sounds/railgun-charging.mp3' },
+    { name: 'railgun firing', path: 'assets/cress/sounds/railgun-fire.mp3' },
+    { name: 'boom', path: '/assets/sounds/boom.mp3' },
 ]
+
+const songs = [
+    'clash',
+    'unison',
+    'shwang',
+    'showdown',
+]
+
+const equalTo = <T>(array1: T[], array2: T[]): boolean => array1.length == array2.length && array1.every((value) => array2.includes(value))
+
+type Song = typeof songs[number]
+
+const MUSIC_VOLUME = 0.6
+class MusicPlayer {
+    song: Song = choose(songs)
+    private audioHandle: AudioPlay | null = null
+    private playedSongs: Song[] = []
+    #isPlaying: boolean = false
+    readonly volume: number = MUSIC_VOLUME
+    onChangeState: ((isPlaying: boolean, song: Song) => void) | null = null
+
+    isPaused(): boolean {
+        return this.audioHandle?.paused ?? false
+    }
+
+    pause() {
+        if (!this.audioHandle || !this.isPlaying) return
+        this.isPlaying = false
+        this.audioHandle.paused = true
+    }
+
+    resume() {
+        if (!this.audioHandle || this.isPlaying) return
+        this.isPlaying = true
+        this.audioHandle.paused = false
+    }
+
+    set isPlaying(playing: boolean) {
+        this.#isPlaying = playing
+        if (this.onChangeState) this.onChangeState(playing, this.song)
+    }
+
+    get isPlaying(): boolean {
+        return this.#isPlaying
+    }
+
+    playASong = () => {
+        if (this.isPlaying || this.audioHandle?.paused) return
+
+        let chosenSong = choose(songs)
+        while (this.playedSongs.includes(chosenSong)) {
+            chosenSong = choose(songs)
+        }
+
+        this.song = chosenSong
+        this.playedSongs.push(this.song)
+
+        if (equalTo(this.playedSongs, songs)) {
+            this.playedSongs = []
+        }
+
+        this.isPlaying = true
+        this.audioHandle = play(this.song, { volume: this.volume })
+        this.audioHandle.onEnd(() => {
+            this.isPlaying = false
+            wait(1, () => {
+                this.playASong()
+            })
+        })
+    }
+}
+
 
 for (const sprite of singleSprites) {
     loadSprite(sprite.name, sprite.path)
 }
 
-for (const sound of sounds) {
-    loadSound(sound.name, sound.path)
+async function loadAllSounds() {
+    const soundPromises = sounds.map(sound => loadSound(sound.name, sound.path))
+    soundPromises.push(...songs.map(song => loadSound(song, `/assets/sounds/${song}.mp3`)))
 }
+
+export const musicPlayer = new MusicPlayer()
+loadAllSounds()
+
 
 
 loadSprite('shooting star', '/assets/shooting star.png', {
@@ -67,7 +145,6 @@ loadSprite('shooting star', '/assets/shooting star.png', {
         }
     }
 })
-
 
 
 loadSprite('cress', '/assets/cress/cress.png', {

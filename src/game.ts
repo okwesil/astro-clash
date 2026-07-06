@@ -27,7 +27,7 @@ function boom(position: Vector) {
         anchor('center'),
     ])
 
-    play('boom')
+    play('boom', { volume: 0.5 })
 }
 
 let rounds = 1
@@ -46,6 +46,7 @@ document.addEventListener('visibilitychange', () => {
     } else if (disconnectTimer != null) {
         clearTimeout(disconnectTimer)
         send('getCurrentState', null)
+        // TODO: make the above line actually matter
     }
 })
 

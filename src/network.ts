@@ -14,7 +14,7 @@ function generateId(length: number) {
 
 // metered.ca
 const PEER_CONFIG = {
-host: 'astro-clash-peerjs-server-796645945227.us-west2.run.app',
+    host: 'astro-clash-peerjs-server-796645945227.us-west2.run.app',
     port: 443,
     path: '/',
     secure: true,
@@ -53,8 +53,8 @@ export let peerId = new Promise<string>((resolve) => peer.on('open', (id) => {
     resolve(id)
 }))
 export let isHost = false
-let conn: DataConnection | null = null 
- 
+let conn: DataConnection | null = null
+
 type ConnEventMap = {
     open: null,
     // reason for closure
@@ -68,22 +68,22 @@ type ConnEventListenerMap = {
 }
 
 const connectionListeners: ConnEventListenerMap = {
-    open: () => {},
-    close: () => {},
+    open: () => { },
+    close: () => { },
 }
 
 export function setConnectionListener<K extends keyof ConnEventMap>(type: K, func: ConnEventListenerMap[K]) {
     connectionListeners[type] = func
 }
 type ErrorFunc = (error: PeerError<
-    "disconnected" 
+    "disconnected"
     | "browser-incompatible" | "invalid-id" |
     "invalid-key" | "network" | "peer-unavailable" |
     "ssl-unavailable" | "server-error" | "socket-error" |
     "socket-closed" | "unavailable-id" | "webrtc"
-    >) => void
+>) => void
 export const setOnError = (func: ErrorFunc) => onError = func
-let onError: ErrorFunc = () => {}
+let onError: ErrorFunc = () => { }
 
 
 peer.on('error', (error) => {
@@ -91,7 +91,11 @@ peer.on('error', (error) => {
     onError(error)
 })
 peer.on('disconnected', () => {
-    connectionListeners.close('Peer disconnected, try refreshing')
+    if (conn) {
+        connectionListeners.close('Peer disconnected for some reason')
+    } else {
+        connectionListeners.close("what's taking you so long")
+    }
     peer.reconnect()
     console.log('Peer disconnected')
 })
@@ -114,7 +118,7 @@ type PacketMap = {
     railgunCharge: { completion: number }
     stoppedRailgunCharge: null
     aimingRailgun: { angle: number }
-    fireRailgun: null 
+    fireRailgun: null
     endOfCooldown: { sentByHost: boolean }
     getCurrentState: null
     currentState: { score: { host: number, other: number }, rounds: number }
@@ -131,24 +135,24 @@ type ListenerMap = {
 }
 
 export const listeners: ListenerMap = {
-    all: () => {},
-    ping: () => {},
-    movement: () => {},
-    projectileShot: () => {},
-    ammo: () => {},
-    projectilePositions: () => {},
-    deleteProjectiles: () => {},
-    death: () => {},
-    healthChange: () => {},
-    stunFrames: () => {},
-    railgunCharge: () => {},
-    stoppedRailgunCharge: () => {},
-    aimingRailgun: () => {},
-    fireRailgun: () => {},
-    endOfCooldown: () => {},
-    getCurrentState: () => {},
-    currentState: () => {},
-    reasonForDisconnect: () => {}
+    all: () => { },
+    ping: () => { },
+    movement: () => { },
+    projectileShot: () => { },
+    ammo: () => { },
+    projectilePositions: () => { },
+    deleteProjectiles: () => { },
+    death: () => { },
+    healthChange: () => { },
+    stunFrames: () => { },
+    railgunCharge: () => { },
+    stoppedRailgunCharge: () => { },
+    aimingRailgun: () => { },
+    fireRailgun: () => { },
+    endOfCooldown: () => { },
+    getCurrentState: () => { },
+    currentState: () => { },
+    reasonForDisconnect: () => { }
 }
 
 const listenersForAllPackets: Record<string, Listener<Packet>> = {}
@@ -176,7 +180,7 @@ export function waitForPacket<K extends keyof PacketMap>(type: K): Promise<Packe
 
 function callListener(packet: Packet) {
     // console.log('inbound packet', packet)
-    
+
     for (const id in listenersForAllPackets) {
         listenersForAllPackets[id](packet)
     }
@@ -225,7 +229,7 @@ function setupConnection(connection: DataConnection) {
     })
     conn.on('close', () => {
         console.log('connection closed', connection.peer)
-        let reasoning = reasonForClosure != null ? reasonForClosure : 'the other player has closed the connection >:(' 
+        let reasoning = reasonForClosure != null ? reasonForClosure : 'the other player has closed the connection >:('
         connectionListeners.close(reasoning)
         reasonForClosure = null
         if (conn === connection) conn = null

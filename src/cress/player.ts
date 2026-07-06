@@ -189,7 +189,6 @@ export default function setupCress(rounds: number) {
             }
 
             if (offscreenSide == 'top' || offscreenSide == 'bottom') {
-                console.log('knockback')
                 player.knockbackVel.y *= -1
                 player.vel.y *= -1
             }

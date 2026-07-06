@@ -1,5 +1,5 @@
 import { setupBackground } from "./background"
-import { transition } from "./main";
+import { musicPlayer, transition } from "./main";
 
 
 export function setupTitle() {
@@ -25,6 +25,7 @@ function title() {
         timer(),
         animate()
     ])
+
     logo.tween(-200, 20, 2, (value) => (logo.pos.y = value), easeOutElastic)
     wait(3, () => {
         logo.animate('pos', [vec2(width() / 2, 40), vec2(width() / 2, 20)], { duration: 3, direction: 'ping-pong' })
@@ -49,6 +50,7 @@ function title() {
     ])
 
     rectangle.onClick(() => {
+        musicPlayer.playASong()
         transition('menu')
     })
 

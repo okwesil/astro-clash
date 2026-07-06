@@ -7,9 +7,9 @@ function choose<T>(...stuff: T[]): T {
     return stuff[randi(stuff.length)]
 }
 
-type sideOfScreen = 'left' | 'right' | 'top' | 'bottom'
-function randomPosOnSideOfScreen(): [Vector, sideOfScreen] {
-    const side = choose('left', 'right', 'top', 'bottom')
+type SideOfScreen = 'left' | 'right' | 'top' | 'bot'
+function randomPosOnSideOfScreen(): [Vector, SideOfScreen] {
+    const side = choose('left', 'right', 'top', 'bot')
     let position;
 
     switch (side) {
@@ -22,14 +22,27 @@ function randomPosOnSideOfScreen(): [Vector, sideOfScreen] {
         case "top":
             position = vec2(rand(width()), 0)
             break
-        case "bottom":
+        case "bot":
             position = vec2(rand(width()), height())
             break
     }
     return [position, side]
 }
 
-function angleTowardsScreen(side: sideOfScreen) {
+function oppositeSide(side: SideOfScreen): SideOfScreen {
+    switch (side) {
+        case "left":
+            return 'right'
+        case "right":
+            return 'left'
+        case "top":
+            return 'bot'
+        case "bot":
+            return 'top'
+    }
+}
+
+function angleTowardsScreen(side: SideOfScreen) {
     let angle
     switch (side) {
         case "left":
@@ -41,7 +54,7 @@ function angleTowardsScreen(side: sideOfScreen) {
         case "top":
             angle = 90
             break
-        case "bottom":
+        case "bot":
             angle = 270
             break
     }
@@ -89,15 +102,16 @@ function createPlanet() {
     const [position, side] = randomPosOnSideOfScreen()
     const angle = angleTowardsScreen(side)
     const planet = choose('ringed planet', 'base planet')
+
     add([
         sprite(planet),
         pos(position),
-        anchor('right'),
-        offscreen({ destroy: true, distance: 100 }),
+        anchor(oppositeSide(side)),
+        offscreen({ destroy: true, distance: 500 }),
         z(ZLevels.indexOf('stars')),
         rotate(rand(-30, 30)),
-        scale(rand(1, 5)),
-        opacity(0.80),
+        scale(rand(0.5, 1.5)),
+        opacity(0.8),
         move(Vec2.fromAngle(angle), 80)
     ])
 }
