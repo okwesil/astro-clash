@@ -31,7 +31,8 @@ function menu(reason: string | undefined) {
     ])
 
     soundToggle.tween(height() + soundToggle.height, height() - 10, 0.3, (value) => (soundToggle.pos.y = value))
-
+    if (musicPlayer.isPlaying)
+        songText.tween(height() + songText.height, height() - 15, 0.3, (value) => (songText.pos.y = value))
 
     musicPlayer.onChangeState = (isPlaying, song) => {
         if (isPlaying) {
