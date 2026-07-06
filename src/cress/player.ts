@@ -4,7 +4,7 @@ import { ZLevels } from "../main"
 import { isHost, send, setDataListener } from "../network"
 import { drawStunCircle, MAX_STUN } from "../player"
 import { shoot, type ProjectileData } from "../projectiles"
-
+import { HEALTHBAR_HEIGHT } from "../otherPlayer"
 
 export const RAILGUN_CHARGE_TIME = 0.5
 export function drawChargeCircle(pos: Vector, width: number, completion: number) {
@@ -116,6 +116,7 @@ export default function setupCress(rounds: number) {
     let stunFrames = 0
     player.onHeal(() => {
         send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp() })
+        healthbar.tween(healthbar.width, (player.hp() / (player.maxHP() as number)) * player.width, .2, (value) => (healthbar.width = value))
     })
 
     let blinking = false
@@ -128,6 +129,7 @@ export default function setupCress(rounds: number) {
             blinkingFrequency = 1
         }
         send('healthChange', { maxHP: player.maxHP() as number, currentValue: player.hp() })
+        healthbar.tween(healthbar.width, (player.hp() / (player.maxHP() as number)) * player.width, .2, (value) => (healthbar.width = value))
     })
 
     let lastPos = player.pos
@@ -408,6 +410,26 @@ export default function setupCress(rounds: number) {
         timer(),
         area(),
         'ui'
+    ])
+
+
+    // red bar
+    add([
+        pos(),
+        rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
+        color(RED),
+        z(ZLevels.indexOf('healthbar')),
+        follow(player, vec2(-(player.width / 2), 30))
+    ])
+
+    // green bar
+    const healthbar = add([
+        pos(),
+        rect(player.width, HEALTHBAR_HEIGHT, { radius: 3 }),
+        color(GREEN),
+        z(ZLevels.indexOf('healthbar')),
+        follow(player, vec2(-(player.width / 2), 30)),
+        timer()
     ])
 
 

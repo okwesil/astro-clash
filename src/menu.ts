@@ -123,11 +123,6 @@ function menu(reason: string | undefined) {
         }
     })
 
-
-    // onKeyPress('p', () => {
-    //     go('game')
-    // })
-
     onKeyPress('escape', () => transition('title'))
 
     idText.onClick(() => {
