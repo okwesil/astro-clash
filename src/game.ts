@@ -45,7 +45,6 @@ document.addEventListener('visibilitychange', () => {
         }, 6000)
     } else if (disconnectTimer != null) {
         clearTimeout(disconnectTimer)
-        send('getCurrentState', null)
         // TODO: make the above line actually matter
     }
 })
@@ -77,6 +76,7 @@ async function game(reset: boolean) {
         score.other = 0
     }
 
+    // game box border
     add([
         rect(width(), height(), { fill: false }),
         pos(0, 0),
@@ -88,6 +88,11 @@ async function game(reset: boolean) {
     // setDataListener('all', (packet) => {
     //     console.log(packet)
     // })
+    setDataListener('currentState', (data) => {
+        rounds = data.rounds
+        score.host = data.score.host
+        score.other = data.score.other
+    })
 
 
     setupBackground()
@@ -104,8 +109,8 @@ async function game(reset: boolean) {
     })
 
     player.onCollide('enemy railgun', (railgun) => {
+        player.hurt(70)
         wait(0.2, () => {
-            player.hurt(70)
             player.knockback(Vec2.fromAngle(railgun.angle + 90 + randi(-60, 60)), 1300)
             new Trail(player, 100, 500, 0.5)
         })
@@ -143,17 +148,20 @@ async function game(reset: boolean) {
     onUpdate(() => {
         const projs = query({ include: 'enemy projectile' })
         send('projectilePositions', { pos: projs.map(proj => proj.pos), projId: projs.map(proj => proj.projId) })
+
     })
 
     // TODO: fix bug where if both players death at the same time, both get credited a loss
     player.onDeath(() => {
-        paused = true
-        boom(player.pos)
-        player.destroy()
-        send('death', { hostWon: !isHost, roundDied: rounds })
-        if (isHost) score.other++
-        else score.host++
-        showWin(!isHost)
+        if (!paused) {
+            paused = true
+            boom(player.pos)
+            player.destroy()
+            send('death', { hostWon: !isHost, roundDied: rounds })
+            if (isHost) score.other++
+            else score.host++
+            showWin(!isHost)
+        }
     })
 
     setDataListener('death', ({ hostWon, roundDied }) => {
@@ -184,8 +192,8 @@ async function game(reset: boolean) {
         arrow.destroy()
     })
 
-    const playerScore = isHost ? score.host : score.other
-    const otherPlayerScore = isHost ? score.other : score.host
+    let playerScore = isHost ? score.host : score.other
+    let otherPlayerScore = isHost ? score.other : score.host
     // crown 
     if (playerScore != otherPlayerScore) {
         const currentPlayerIsWinning = playerScore > otherPlayerScore
@@ -209,7 +217,13 @@ async function game(reset: boolean) {
         player.otherPlayersPos = otherPlayer.pos
         otherPlayer.otherPlayersPos = player.pos
 
+        playerScore = isHost ? score.host : score.other
+        otherPlayerScore = isHost ? score.other : score.host
         drawScoreboard(playerScore, otherPlayerScore)
+        if ((Date.now() - timeEscapeShown) > 3000 && escapeMessage.opacity == 1) {
+            escapeMessage.tween(1, 0, 0.3, (value) => (escapeMessage.opacity = value))
+            timeEscapeShown = Date.now()
+        }
     })
 
     let sentPing = false
@@ -233,10 +247,35 @@ async function game(reset: boolean) {
         }
     })
 
+    let timeEscapeShown = 0
+    const escapeMessage = add([
+        text('hit ESC again to leave the match', { size: 30, font: 'pixel' }),
+        pos(width(), 10),
+        anchor('topright'),
+        opacity(0),
+        timer()
+    ])
+
+    onKeyPress('escape', () => {
+        console.log('escape pressed')
+        if (escapeMessage.opacity == 1) {
+            send('reasonForDisconnect', { reason: "the other player doesn't want to play with you anymore" })
+            closeConnection("you left the match")
+            transition('menu')
+        } else {
+            escapeMessage.tween(0, 1, 0.3, (value) => (escapeMessage.opacity = value))
+            timeEscapeShown = Date.now()
+        }
+    })
+
     await showCountdown(3)
 
     async function showCountdown(start: number) {
         paused = true
+        if (isHost) {
+            send('currentState', { score, rounds })
+        }
+
         const countdown = add([
             text(start.toString(), { size: 100, font: 'pixel' }),
             pos(center()),

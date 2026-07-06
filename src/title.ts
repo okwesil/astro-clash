@@ -54,7 +54,7 @@ function title() {
         transition('menu')
     })
 
-    onKeyPress('enter', () => {
+    onKeyRelease('enter', () => {
         transition('menu')
     })
 

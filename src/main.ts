@@ -101,7 +101,7 @@ class MusicPlayer {
 
     startMusic() {
         console.log(localStorage.getItem('audio paused'))
-        if (localStorage.getItem('audio paused') == 'true') return
+        if (localStorage.getItem('audio paused') == 'true' || this.isPlaying) return
         this.playASong()
     }
 

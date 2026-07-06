@@ -210,8 +210,9 @@ export default function setupCress(rounds: number) {
 
         if (stunFrames > 0) {
             stunFrames--
-            send('stunFrames', { frames: stunFrames })
             elapsedCharge = 0
+            send('stunFrames', { frames: stunFrames })
+            send('stoppedRailgunCharge', null)
         }
 
         if (Math.abs(player.vel.x) > 0.2) {
@@ -313,8 +314,7 @@ export default function setupCress(rounds: number) {
             send('railgunCharge', { completion: elapsedCharge / RAILGUN_CHARGE_TIME })
         }
 
-        if (player.charged() && !alreadySentFullCompletion) {
-            alreadySentFullCompletion = true
+        if (player.charged()) {
             send('railgunCharge', { completion: 1 })
         }
     })

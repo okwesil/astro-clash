@@ -93,11 +93,10 @@ peer.on('error', (error) => {
 peer.on('disconnected', () => {
     if (conn) {
         connectionListeners.close('Peer disconnected for some reason')
+        peer.reconnect()
     } else {
         connectionListeners.close("what's taking you so long")
     }
-    peer.reconnect()
-    console.log('Peer disconnected')
 })
 peer.on('close', () => {
     connectionListeners.close('Peer closed, try refreshing')
@@ -120,7 +119,6 @@ type PacketMap = {
     aimingRailgun: { angle: number }
     fireRailgun: null
     endOfCooldown: { sentByHost: boolean }
-    getCurrentState: null
     currentState: { score: { host: number, other: number }, rounds: number }
     reasonForDisconnect: { reason: string }
 }
@@ -150,7 +148,6 @@ export const listeners: ListenerMap = {
     aimingRailgun: () => { },
     fireRailgun: () => { },
     endOfCooldown: () => { },
-    getCurrentState: () => { },
     currentState: () => { },
     reasonForDisconnect: () => { }
 }
