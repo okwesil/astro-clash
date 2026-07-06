@@ -198,6 +198,8 @@ export default function setupCress(rounds: number) {
 
         if (elapsedCharge == 0) {
             player.angle = angleBetween(player.pos, player.otherPlayersPos)
+        } else {
+            send('aimingRailgun', { angle: player.angle })
         }
 
         if (blinking) {
@@ -248,6 +250,7 @@ export default function setupCress(rounds: number) {
         if (stunFrames > 0 || elapsedCharge != 0) return
         movePlayer(vec2(0, -1))
     })
+
     onKeyDown(['s', 'down'], () => {
         if (stunFrames > 0 || elapsedCharge != 0) return
         movePlayer(vec2(0, 1))
@@ -263,7 +266,6 @@ export default function setupCress(rounds: number) {
 
         if (elapsedCharge != 0) {
             turnPlayer(-1)
-            send('aimingRailgun', { angle: player.angle })
             return
         }
 
@@ -275,7 +277,6 @@ export default function setupCress(rounds: number) {
 
         if (elapsedCharge != 0) {
             turnPlayer(1)
-            send('aimingRailgun', { angle: player.angle })
             return
         }
 
