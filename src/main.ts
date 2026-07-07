@@ -54,6 +54,11 @@ export const ships = [
     'cress',
     'blaze',
 ]
+
+export const shipDescriptions = [
+    'An alien spacecraft that seems to use some sort of bio-tech for functioning \n\n Primary: lasers that deal miniscule damage but stun the enemy for a short time \n Secondary: railgun that almost incenerates anything it hits',
+    'A craft of the Emberians that uses fire to smite its enemies \n'
+]
 export type Ship = typeof ships[number]
 
 const songs = [

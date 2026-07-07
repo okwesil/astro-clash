@@ -88,9 +88,9 @@ let onError: ErrorFunc = () => { }
 
 
 peer.on('error', (error) => {
-    console.error('Peer error', error.cause, error.message)
+    console.error('Peer error', error.type, error.message)
     onError(error)
-    if (!peer) {
+    if (!peer || error.type == 'disconnected') {
         peer = new Peer(generateId(5), PEER_CONFIG)
     }
 })
