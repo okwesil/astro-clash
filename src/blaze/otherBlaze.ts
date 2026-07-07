@@ -29,7 +29,8 @@ export default function setupOtherBlaze(rounds: number) {
             targetPos: startPos,
             otherPlayersPos: vec2(),
             blinking: false,
-            blinkingFrequency: 8
+            blinkingFrequency: 8,
+            stunFrames: 0
         }
     ])
 
@@ -47,15 +48,11 @@ export default function setupOtherBlaze(rounds: number) {
     })
 
     player.onDraw(() => {
-        if (stunFrames > 0) {
-            drawStunCircle(vec2(), player.width, stunFrames)
+        if (player.stunFrames > 0) {
+            drawStunCircle(vec2(), player.width, player.stunFrames)
         }
     })
 
-    setDataListener('movement', (data) => {
-        player.targetPos.x = data.x
-        player.targetPos.y = data.y
-    })
 
     const ammoBar = add([
         rect(10, player.height),
@@ -72,17 +69,11 @@ export default function setupOtherBlaze(rounds: number) {
             ammoBar.tween(0, player.height, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
         }
 
-        shoot(data.data, false, -1)
+        shoot(data.data, false, -1, player)
     })
 
     setDataListener('ammo', ({ ammo }) => {
         ammoBar.height = ammo / MAX_AMMO * player.height
-    })
-
-
-    let stunFrames = 0
-    setDataListener('stunFrames', ({ frames }) => {
-        stunFrames = frames
     })
 
     return player

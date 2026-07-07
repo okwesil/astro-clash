@@ -31,7 +31,8 @@ export default function setupOtherCress(rounds: number) {
             targetPos: startPos,
             otherPlayersPos: vec2(),
             blinking: false,
-            blinkingFrequency: 8
+            blinkingFrequency: 8,
+            stunFrames: 0
         }
     ])
 
@@ -54,14 +55,9 @@ export default function setupOtherCress(rounds: number) {
             drawChargeCircle(vec2(), player.width, railgunChargeCompletion)
         }
 
-        if (stunFrames > 0) {
-            drawStunCircle(vec2(), player.width, stunFrames)
+        if (player.stunFrames > 0) {
+            drawStunCircle(vec2(), player.width, player.stunFrames)
         }
-    })
-
-    setDataListener('movement', (data) => {
-        player.targetPos.x = data.x
-        player.targetPos.y = data.y
     })
 
     const ammoBar = add([
@@ -79,17 +75,11 @@ export default function setupOtherCress(rounds: number) {
             ammoBar.tween(0, player.height, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
         }
 
-        shoot(data.data, false, -1)
+        shoot(data.data, false, -1, player)
     })
 
     setDataListener('ammo', ({ ammo }) => {
         ammoBar.height = ammo / MAX_AMMO * player.height
-    })
-
-
-    let stunFrames = 0
-    setDataListener('stunFrames', ({ frames }) => {
-        stunFrames = frames
     })
 
     let railgunChargeCompletion = 0

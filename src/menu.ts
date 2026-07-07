@@ -1,6 +1,6 @@
 import { setupBackground } from './background'
 import { musicPlayer, shipDescriptions, ships, transition, ZLevels, type Ship } from './main'
-import { connect, peerId, setConnectionListener, setOnError } from './network'
+import { connect, peerId, send, setConnectionListener, setOnError } from './network'
 import type { Vector } from './game'
 import type { GameObj, SpriteComp, PosComp, AnchorComp, TimerComp, ScaleComp, RotateComp } from 'kaplay'
 
@@ -9,14 +9,15 @@ export function setupMenu() {
     scene('menu', menu)
 }
 
-
 let selectedShipIndex = 0
 export const getSelectedShip = (): Ship => ships[selectedShipIndex]
 function menu(reason: string | undefined) {
     setConnectionListener('close', (reason) => transition('menu', reason))
     setBackground(BLACK)
     setupBackground()
-    setConnectionListener('open', () => transition('game', true))
+    setConnectionListener('open', () => {
+        transition('game', true)
+    })
 
     const soundToggle = add([
         sprite(musicPlayer.isPlaying ? 'sound on' : 'sound off'),

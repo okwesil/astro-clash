@@ -1,15 +1,14 @@
-import type { AudioPlay, TimerController } from "kaplay"
+import type { TimerController } from "kaplay"
 import { angleBetween, paused, type Vector } from "../game"
 import { ZLevels } from "../main"
 import { isHost, send, setDataListener } from "../network"
 import { drawStunCircle, MAX_STUN } from "../player"
-import { shoot, type ProjectileData } from "../projectiles"
 import { HEALTHBAR_HEIGHT } from "../otherPlayer"
+import { shoot, type ProjectileData } from "../projectiles"
 
-export const MAX_AMMO = 20
+export const MAX_AMMO = 2
 export const AMMO_REFRESH_TIME = 2
 export default function setupBlaze(rounds: number) {
-    send('selectedShip', 'blaze')
     const SPEED = 80
     const FRICTION = 0.8
     const KNOCKBACK_FRICTION = 0.6
@@ -19,7 +18,6 @@ export default function setupBlaze(rounds: number) {
         startPos.y = height() - startPos.y
         angle += 180
     }
-    let elapsedCharge = 0
 
     const player = add([
         health(100, 100),
@@ -108,19 +106,13 @@ export default function setupBlaze(rounds: number) {
 
     player.onUpdate(() => {
         if (paused) { player.vel = vec2(); return }
-        timeSinceLastShot += dt()
-        if (timeSinceLastShot > 1 && ammoRefreshTimer == null && ammo < MAX_AMMO) {
-            ammoBar.tween(ammoBar.height, AMMO_BAR_HEIGHT, 0.3, (value) => (ammoBar.height = value))
-            wait(0.3, () => {
-                ammo = MAX_AMMO
-                send('ammo', { ammo })
-            })
-        }
 
         player.vel = player.vel.add(player.knockbackVel)
         player.move(player.vel)
         player.vel = player.vel.scale(FRICTION)
         player.knockbackVel = player.knockbackVel.scale(KNOCKBACK_FRICTION)
+
+        player.angle = angleBetween(player.pos, player.otherPlayersPos)
 
         const offscreenSide = partiallyOffscreen(1)
         if (player.knockbackVel.len() > 0 && offscreenSide != null) {
@@ -137,21 +129,13 @@ export default function setupBlaze(rounds: number) {
 
         keepPlayerOnScreen()
 
-        if (elapsedCharge == 0) {
-            player.angle = angleBetween(player.pos, player.otherPlayersPos)
-        } else {
-            send('aimingRailgun', { angle: player.angle })
-        }
-
         if (blinking) {
             player.opacity = Math.min(2 * (Math.sin(debug.numFrames() / blinkingFrequency) + 1), 1)
         }
 
         if (stunFrames > 0) {
             stunFrames--
-            elapsedCharge = 0
             send('stunFrames', { frames: stunFrames })
-            send('stoppedRailgunCharge', null)
         }
 
         player.angle += player.angularSpeed
@@ -174,45 +158,53 @@ export default function setupBlaze(rounds: number) {
     }
 
     onKeyDown(['w', 'up'], () => {
-        if (stunFrames > 0 || elapsedCharge != 0) return
+        if (stunFrames > 0 || paused) return
         movePlayer(vec2(0, -1))
     })
 
     onKeyDown(['s', 'down'], () => {
-        if (stunFrames > 0 || elapsedCharge != 0) return
+        if (stunFrames > 0 || paused) return
         movePlayer(vec2(0, 1))
     })
 
-
-    const turnPlayer = (direction: 1 | -1) => {
-        player.angle += direction
-    }
-
     onKeyDown(['a', 'left'], () => {
-        if (stunFrames > 0) return
+        if (stunFrames > 0 || paused) return
         movePlayer(vec2(-1, 0))
     })
 
     onKeyDown(['d', 'right'], () => {
-        if (stunFrames > 0) return
+        if (stunFrames > 0 || paused) return
         movePlayer(vec2(1, 0))
     })
 
-    onKeyDown(['x', '/'], () => {
-        if (paused) return
-    })
-
     onKeyRelease(['x', '/'], () => {
-
+        if (paused || stunFrames > 0) return
     })
 
     let ammo = MAX_AMMO
     let ammoRefreshTimer: TimerController | null = null
     const AMMO_BAR_HEIGHT = height() / 4
 
-    let timeSinceLastShot = 0
     let shooting = false
-    onKeyDown(['z', '.'], () => {
+    let shootOnLeftSide = true
+    onKeyPress(['z', '.'], () => {
+        if (stunFrames > 0 || paused || ammo == 0) return
+        ammo--
+        ammoBar.height = ammo / MAX_AMMO * AMMO_BAR_HEIGHT
+
+        const missile: ProjectileData = {
+            type: 'fire missile',
+            damage: 10,
+            sprite: 'fire missile',
+            pos: vec2(player.pos),
+            direction: player.angle + 180 + (shootOnLeftSide ? -10 : 10),
+            speed: 7,
+            sound: 'missile launch',
+            projId: rand(100000).toString()
+        }
+        shootOnLeftSide = !shootOnLeftSide
+
+        shoot(missile, true, ammo, player)
         if (ammo == 0 && ammoRefreshTimer == null) {
             shooting = false
             ammoBar.tween(0, AMMO_BAR_HEIGHT, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
@@ -224,10 +216,6 @@ export default function setupBlaze(rounds: number) {
                 ammoBarOutline.opacity = 0.5
             })
         }
-    })
-
-    onKeyRelease(['z', '.'], () => {
-        shooting = false
     })
 
     // ammo bar outline

@@ -68,7 +68,6 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
 export const MAX_AMMO = 20
 export const AMMO_REFRESH_TIME = 2
 export default function setupCress(rounds: number) {
-    send('selectedShip', 'cress')
     const SPEED = 80
     const FRICTION = 0.8
     const KNOCKBACK_FRICTION = 0.6
@@ -362,7 +361,7 @@ export default function setupCress(rounds: number) {
                 projId: randi(100000).toString()
             }
 
-            shoot(data, true, ammo)
+            shoot(data, true, ammo, player)
             shootOnLeftSide = !shootOnLeftSide
             lastShotTime = Date.now()
         }

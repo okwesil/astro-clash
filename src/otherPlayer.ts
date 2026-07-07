@@ -3,20 +3,19 @@ import setupOtherBlaze from "./blaze/otherBlaze";
 import setupOtherCress from "./cress/otherCress";
 import type { Vector } from "./game";
 import { ZLevels, type Ship } from "./main";
-import { getSelectedShip } from "./menu";
 import { setDataListener } from "./network";
 
 
 export const HEALTHBAR_HEIGHT = 10
-export type OtherPlayer = GameObj<PosComp | SpriteComp | ColorComp | ScaleComp | ZComp | AreaComp | RotateComp | AnchorComp | OpacityComp | {
+export type OtherPlayerObject = GameObj<PosComp | SpriteComp | ColorComp | ScaleComp | ZComp | AreaComp | RotateComp | AnchorComp | OpacityComp | {
     targetPos: Vector;
     otherPlayersPos: Vector;
     blinking: boolean;
     blinkingFrequency: number;
 }>
 
-export function setupOtherPlayer(ship: Ship, rounds: number) {
-    let player: OtherPlayer;
+export function setupOtherPlayer(ship: Ship, rounds: number): OtherPlayerObject {
+    let player: OtherPlayerObject;
     switch (ship) {
         case 'blaze':
             player = setupOtherBlaze(rounds)
@@ -58,5 +57,9 @@ export function setupOtherPlayer(ship: Ship, rounds: number) {
         }
     })
 
+    setDataListener('movement', (data) => {
+        player.targetPos.x = data.x
+        player.targetPos.y = data.y
+    })
     return player
 }

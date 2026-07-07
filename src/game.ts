@@ -4,6 +4,7 @@ import { setupBackground, Trail } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
 import { setDataListener, isHost, send, closeConnection, waitForPacket } from "./network"
 import { transition, ZLevels, type Ship } from "./main"
+import { getSelectedShip } from "./menu"
 
 export let paused = false
 export function setupGame() {
@@ -30,11 +31,6 @@ function boom(position: Vector) {
     play('boom', { volume: 0.5 })
 }
 
-let rounds = 1
-let score = {
-    host: 0,
-    other: 0,
-}
 
 let disconnectTimer: number | null = null
 document.addEventListener('visibilitychange', () => {
@@ -69,7 +65,15 @@ function drawScoreboard(currentPlayerScore: number, otherPlayerScore: number) {
 
 
 let otherPlayerShip: Ship | null = null
+let rounds = 1
+let score = {
+    host: 0,
+    other: 0,
+}
+
 async function game(reset: boolean) {
+    setupBackground()
+
     if (reset) {
         rounds = 1
         score.host = 0
@@ -94,11 +98,24 @@ async function game(reset: boolean) {
         score.other = data.score.other
     })
 
-
-    setupBackground()
     const player = setupPlayer(rounds)
-    if (!otherPlayerShip) otherPlayerShip = await waitForPacket('selectedShip')
-    const otherPlayer = setupOtherPlayer(otherPlayerShip, rounds)
+
+    if (rounds == 1) {
+        const countdownInterval = setInterval(() => {
+            send('selectedShip', getSelectedShip())
+        }, 20)
+
+        otherPlayerShip = await new Promise<Ship>(resolve => setDataListener('selectedShip', ship => {
+            send('recievedSelectedShip', null)
+            resolve(ship)
+        }))
+
+        setDataListener('recievedSelectedShip', () => {
+            clearInterval(countdownInterval)
+        })
+    }
+
+    const otherPlayer = setupOtherPlayer(otherPlayerShip as Ship, rounds)
 
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore
@@ -147,8 +164,9 @@ async function game(reset: boolean) {
 
     onUpdate(() => {
         const projs = query({ include: 'enemy projectile' })
-        send('projectilePositions', { pos: projs.map(proj => proj.pos), projId: projs.map(proj => proj.projId) })
-
+        if (projs.length > 0) {
+            send('projectilePositions', { pos: projs.map(proj => proj.pos), projId: projs.map(proj => proj.projId) })
+        }
     })
 
     // TODO: fix bug where if both players death at the same time, both get credited a loss
@@ -220,7 +238,7 @@ async function game(reset: boolean) {
         playerScore = isHost ? score.host : score.other
         otherPlayerScore = isHost ? score.other : score.host
         drawScoreboard(playerScore, otherPlayerScore)
-        if ((Date.now() - timeEscapeShown) > 3000 && escapeMessage.opacity == 1) {
+        if ((Date.now() - timeEscapeShown) > 3000 && escapeMessage.opacity > 0.2) {
             escapeMessage.tween(1, 0, 0.3, (value) => (escapeMessage.opacity = value))
             timeEscapeShown = Date.now()
         }
@@ -257,7 +275,6 @@ async function game(reset: boolean) {
     ])
 
     onKeyPress('escape', () => {
-        console.log('escape pressed')
         if (escapeMessage.opacity == 1) {
             send('reasonForDisconnect', { reason: "the other player doesn't want to play with you anymore" })
             closeConnection("you left the match")
@@ -272,6 +289,7 @@ async function game(reset: boolean) {
 
     async function showCountdown(start: number) {
         paused = true
+
         if (isHost) {
             send('currentState', { score, rounds })
         }

@@ -41,6 +41,8 @@ const singleSprites: { name: string, path: string }[] = [
     { name: 'sound off', path: '/assets/sound off.png' },
     { name: 'blaze', path: '/assets/blaze/blaze.png' },
     { name: 'blaze blue', path: '/assets/blaze/blaze blue.png' },
+    { name: 'fire missile', path: '/assets/blaze/fire missile.png' },
+    { name: 'fire missile blue', path: '/assets/blaze/fire missile blue.png' },
 ]
 
 const sounds: { name: string, path: string }[] = [
@@ -48,6 +50,7 @@ const sounds: { name: string, path: string }[] = [
     { name: 'railgun charging', path: 'assets/cress/sounds/railgun-charging.mp3' },
     { name: 'railgun firing', path: 'assets/cress/sounds/railgun-fire.mp3' },
     { name: 'boom', path: '/assets/sounds/boom.mp3' },
+    { name: 'missile launch', path: '/assets/blaze/sounds/missile launch.mp3' },
 ]
 
 export const ships = [
@@ -302,5 +305,5 @@ setupBackground()
 setupTitle()
 setupMenu()
 setupGame()
-transition('title')
+transition('menu')
 

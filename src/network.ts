@@ -87,11 +87,12 @@ export const setOnError = (func: ErrorFunc) => onError = func
 let onError: ErrorFunc = () => { }
 
 
-peer.on('error', (error) => {
+peer.on('error', async (error) => {
     console.error('Peer error', error.type, error.message)
     onError(error)
     if (!peer || error.type == 'disconnected') {
         peer = new Peer(generateId(5), PEER_CONFIG)
+        await new Promise(resolve => peer.on('open', resolve))
     }
 })
 peer.on('disconnected', () => {
@@ -110,6 +111,7 @@ peer.on('close', () => {
 type PacketMap = {
     all: any
     ping: null
+    recievedSelectedShip: null
     selectedShip: Ship
     movement: Vec2
     projectileShot: { data: ProjectileData, newAmmo: number }
@@ -140,6 +142,7 @@ type ListenerMap = {
 export const listeners: ListenerMap = {
     all: () => { },
     ping: () => { },
+    recievedSelectedShip: () => { },
     selectedShip: () => { },
     movement: () => { },
     projectileShot: () => { },
@@ -182,8 +185,6 @@ export function waitForPacket<K extends keyof PacketMap>(type: K): Promise<Packe
 }
 
 function callListener(packet: Packet) {
-    // console.log('inbound packet', packet)
-
     for (const id in listenersForAllPackets) {
         listenersForAllPackets[id](packet)
     }
@@ -239,10 +240,14 @@ function setupConnection(connection: DataConnection) {
     })
 }
 
-export function connect(id: string) {
+export async function connect(id: string) {
     console.log('connect() called with id', id)
+    if (!peer) {
+        peer = new Peer(generateId(5), PEER_CONFIG)
+        await new Promise(resolve => peer.on('open', resolve))
+    }
     const connection = peer.connect(id, {
-        reliable: false,
+        reliable: true,
     })
     isHost = false
     setupConnection(connection)
