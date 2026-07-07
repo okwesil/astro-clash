@@ -39,6 +39,8 @@ const singleSprites: { name: string, path: string }[] = [
     { name: 'base planet', path: '/assets/base planet.png' },
     { name: 'sound on', path: '/assets/sound on.png' },
     { name: 'sound off', path: '/assets/sound off.png' },
+    { name: 'blaze', path: '/assets/blaze/blaze.png' },
+    { name: 'blaze blue', path: '/assets/blaze/blaze blue.png' },
 ]
 
 const sounds: { name: string, path: string }[] = [
@@ -47,6 +49,12 @@ const sounds: { name: string, path: string }[] = [
     { name: 'railgun firing', path: 'assets/cress/sounds/railgun-fire.mp3' },
     { name: 'boom', path: '/assets/sounds/boom.mp3' },
 ]
+
+export const ships = [
+    'cress',
+    'blaze',
+]
+export type Ship = typeof ships[number]
 
 const songs = [
     'clash',

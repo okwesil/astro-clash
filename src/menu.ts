@@ -1,12 +1,17 @@
 import { setupBackground } from './background'
-import { musicPlayer, transition, ZLevels } from './main'
+import { musicPlayer, ships, transition, ZLevels, type Ship } from './main'
 import { connect, peerId, setConnectionListener, setOnError } from './network'
+import type { Vector } from './game'
+import type { GameObj, SpriteComp, PosComp, AnchorComp, TimerComp, ScaleComp, RotateComp } from 'kaplay'
 
 
 export function setupMenu() {
     scene('menu', menu)
 }
 
+
+let selectedShipIndex = 0
+export const getSelectedShip = (): Ship => ships[selectedShipIndex]
 function menu(reason: string | undefined) {
     setConnectionListener('close', (reason) => transition('menu', reason))
     setBackground(BLACK)
@@ -51,8 +56,8 @@ function menu(reason: string | undefined) {
     })
 
     const idText = add([
-        pos(center().add(vec2(0, -60))),
-        anchor('center'),
+        pos(vec2(width() / 2, 20)),
+        anchor('top'),
         text('generating ID', {
             size: 60,
             width: width(),
@@ -74,8 +79,8 @@ function menu(reason: string | undefined) {
     // input background so stars does mess it up
     const startingMessage = 'type the id of the player you want to join'
     const input = add([
-        pos(center()),
-        anchor('center'),
+        pos(vec2(width() / 2, 90)),
+        anchor('top'),
         text(startingMessage, {
             size: 30,
             width: 500,
@@ -140,4 +145,59 @@ function menu(reason: string | undefined) {
             }
         }
     })
+
+    const SHIP_SCALE = 4
+    // all ship sprites are 50 x 50
+    const SHIP_WIDTH = 50
+    const SHIP_SPACING = SHIP_WIDTH * SHIP_SCALE + 100
+    function calculateShipPosition(index: number): Vector {
+        return vec2(width() / 2 + (SHIP_SPACING * index) - selectedShipIndex * SHIP_SPACING, height() - SHIP_WIDTH * SHIP_SCALE - 10)
+    }
+
+    function repositionShips(direction: 'left' | 'right') {
+        for (let i = 0; i < ships.length; i++) {
+            const ship = shipObjects[i]
+            if (i == selectedShipIndex) {
+                ship.tween(ship.scale, vec2(SHIP_SCALE + 2.5), 0.2, (value) => (ship.scale = value))
+            } else {
+                ship.tween(ship.scale, vec2(SHIP_SCALE), 0.2, (value) => (ship.scale = value))
+            }
+            ship.tween(ship.pos, calculateShipPosition(i), 0.2 + (direction == 'right' ? (0.1 * i) : (0.1 * (ships.length - i))), (value) => (ship.pos = value))
+        }
+
+    }
+
+    onKeyPress('right', () => {
+        selectedShipIndex = (selectedShipIndex + 1) % ships.length
+        repositionShips('right')
+    })
+
+    onKeyPress('left', () => {
+        selectedShipIndex--
+        if (selectedShipIndex < 0) selectedShipIndex = ships.length - 1
+        repositionShips('left')
+    })
+
+    // ship selection
+    type ShipObject = GameObj<SpriteComp | PosComp | AnchorComp | TimerComp | ScaleComp | RotateComp>
+    const shipObjects: ShipObject[] = []
+    for (let i = 0; i < ships.length; i++) {
+        let position = calculateShipPosition(i)
+        const obj = add([
+            pos(position),
+            anchor('center'),
+            sprite(ships[i]),
+            scale(SHIP_SCALE),
+            rotate(),
+            timer(),
+            area(),
+        ])
+
+        obj.onUpdate(() => {
+            obj.angle += 2
+        })
+        shipObjects.push(obj)
+    }
+    repositionShips('left')
 }
+

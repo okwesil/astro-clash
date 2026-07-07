@@ -1,7 +1,7 @@
 import { angleBetween } from "../game"
 import { ZLevels } from "../main"
 import { setDataListener, isHost } from "../network"
-import { AMMO_REFRESH_TIME, drawChargeCircle, drawRailgunAimingLine, fireRailgun, MAX_AMMO } from "./player"
+import { AMMO_REFRESH_TIME, drawChargeCircle, drawRailgunAimingLine, fireRailgun, MAX_AMMO } from "./cress"
 import { shoot } from "../projectiles"
 import { drawStunCircle } from "../player"
 

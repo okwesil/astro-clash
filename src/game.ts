@@ -2,8 +2,8 @@ import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
 import { setupBackground, Trail } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
-import { setDataListener, isHost, send, closeConnection } from "./network"
-import { transition, ZLevels } from "./main"
+import { setDataListener, isHost, send, closeConnection, waitForPacket } from "./network"
+import { transition, ZLevels, type Ship } from "./main"
 
 export let paused = false
 export function setupGame() {
@@ -68,7 +68,7 @@ function drawScoreboard(currentPlayerScore: number, otherPlayerScore: number) {
 }
 
 
-
+let otherPlayerShip: Ship | null = null
 async function game(reset: boolean) {
     if (reset) {
         rounds = 1
@@ -97,8 +97,8 @@ async function game(reset: boolean) {
 
     setupBackground()
     const player = setupPlayer(rounds)
-    const otherPlayer = setupOtherPlayer(rounds)
-
+    if (!otherPlayerShip) otherPlayerShip = await waitForPacket('selectedShip')
+    const otherPlayer = setupOtherPlayer(otherPlayerShip, rounds)
 
     player.onCollide('enemy projectile', (proj) => {
         // @ts-ignore

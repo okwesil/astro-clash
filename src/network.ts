@@ -2,6 +2,7 @@ import { Peer, PeerError, type DataConnection } from 'peerjs'
 import type { Vec2 } from 'kaplay'
 import type { ProjectileData } from './projectiles'
 import type { Vector } from './game'
+import type { Ship } from './main'
 
 function generateId(length: number) {
     let id = ''
@@ -89,6 +90,9 @@ let onError: ErrorFunc = () => { }
 peer.on('error', (error) => {
     console.error('Peer error', error.cause, error.message)
     onError(error)
+    if (!peer) {
+        peer = new Peer(generateId(5), PEER_CONFIG)
+    }
 })
 peer.on('disconnected', () => {
     if (conn) {
@@ -104,8 +108,9 @@ peer.on('close', () => {
 })
 
 type PacketMap = {
+    all: any
     ping: null
-    all: Packet
+    selectedShip: Ship
     movement: Vec2
     projectileShot: { data: ProjectileData, newAmmo: number }
     ammo: { ammo: number }
@@ -135,6 +140,7 @@ type ListenerMap = {
 export const listeners: ListenerMap = {
     all: () => { },
     ping: () => { },
+    selectedShip: () => { },
     movement: () => { },
     projectileShot: () => { },
     ammo: () => { },
@@ -166,11 +172,11 @@ export function setDataListener<K extends keyof PacketMap>(type: K | 'all', func
 }
 
 
-export function waitForPacket<K extends keyof PacketMap>(type: K): Promise<Packet> {
+export function waitForPacket<K extends keyof PacketMap>(type: K): Promise<PacketMap[K]> {
     return new Promise(resolve => {
         const id = setDataListener('all', (packet: Packet) => {
             if (id) delete listenersForAllPackets[id]
-            if (packet.type == type) resolve(packet)
+            if (packet.type == type) resolve(packet.data)
         })
     })
 }

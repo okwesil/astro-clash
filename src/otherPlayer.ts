@@ -1,10 +1,33 @@
-import setupOtherCress from "./cress/otherPlayer";
-import { ZLevels } from "./main";
+import type { GameObj, PosComp, SpriteComp, ColorComp, ScaleComp, ZComp, AreaComp, RotateComp, AnchorComp, OpacityComp } from "kaplay";
+import setupOtherBlaze from "./blaze/otherBlaze";
+import setupOtherCress from "./cress/otherCress";
+import type { Vector } from "./game";
+import { ZLevels, type Ship } from "./main";
+import { getSelectedShip } from "./menu";
 import { setDataListener } from "./network";
 
+
 export const HEALTHBAR_HEIGHT = 10
-export function setupOtherPlayer(rounds: number) {
-    const player = setupOtherCress(rounds)
+export type OtherPlayer = GameObj<PosComp | SpriteComp | ColorComp | ScaleComp | ZComp | AreaComp | RotateComp | AnchorComp | OpacityComp | {
+    targetPos: Vector;
+    otherPlayersPos: Vector;
+    blinking: boolean;
+    blinkingFrequency: number;
+}>
+
+export function setupOtherPlayer(ship: Ship, rounds: number) {
+    let player: OtherPlayer;
+    switch (ship) {
+        case 'blaze':
+            player = setupOtherBlaze(rounds)
+            break
+        case 'cress':
+            player = setupOtherCress(rounds)
+            break
+        default:
+            // unreachable
+            player = setupOtherCress(rounds)
+    }
     // red bar
     add([
         pos(),

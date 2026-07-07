@@ -68,6 +68,7 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
 export const MAX_AMMO = 20
 export const AMMO_REFRESH_TIME = 2
 export default function setupCress(rounds: number) {
+    send('selectedShip', 'cress')
     const SPEED = 80
     const FRICTION = 0.8
     const KNOCKBACK_FRICTION = 0.6
@@ -290,7 +291,6 @@ export default function setupCress(rounds: number) {
         player.angularSpeed = 0
     })
 
-    let alreadySentFullCompletion = false
     let railgunAudio: AudioPlay = play('railgun charging', {
         volume: 0
     })
@@ -321,7 +321,6 @@ export default function setupCress(rounds: number) {
 
     onKeyRelease(['x', '/'], () => {
         send('stoppedRailgunCharge', null)
-        alreadySentFullCompletion = false
         railgunAudio.stop()
         alreadyPlaying = false
         firstFrameOfCharge = true
