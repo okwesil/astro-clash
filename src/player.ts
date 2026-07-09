@@ -3,6 +3,7 @@ import setupBlaze from "./blaze/blaze"
 import setupCress from "./cress/cress"
 import { type Vector } from "./game"
 import { getSelectedShip } from "./menu"
+import { Trail, type DamageOverTime } from "./effects"
 
 export const MAX_STUN = 40
 
@@ -27,16 +28,35 @@ export type CurrentPlayerObject = GameObj<HealthComp | PosComp | SpriteComp | Co
     stun: (duration: number) => void;
     knockback: (direction: Vector, strength: number) => void;
     otherPlayersPos: Vector;
+    dots: DamageOverTime[]
 }>
 
 export function setupPlayer(rounds: number): CurrentPlayerObject {
+    let player: CurrentPlayerObject
     switch (getSelectedShip()) {
         case 'cress':
-            return setupCress(rounds)
+            player = setupCress(rounds)
+            break
         case 'blaze':
-            return setupBlaze(rounds)
+            player = setupBlaze(rounds)
+            break
         default:
             // unreachable
-            return setupCress(rounds)
+            player = setupCress(rounds)
     }
+
+    player.onUpdate(() => {
+        player.dots = player.dots.filter(dot => {
+            if (Date.now() - dot.lastTickTime > dot.interval) {
+                player.hurt(dot.damage)
+                dot.lastTickTime = Date.now()
+                dot.ticksLeft--
+            }
+
+            new Trail(player, 50, 500, 0.5)
+            return dot.ticksLeft > 0
+        })
+    })
+
+    return player
 }

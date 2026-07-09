@@ -109,7 +109,8 @@ export default function setupCress(rounds: number) {
                 player.knockbackVel = player.knockbackVel.add(direction.scale(strength))
             },
             charged: () => elapsedCharge >= RAILGUN_CHARGE_TIME - 0.01,
-            otherPlayersPos: vec2()
+            otherPlayersPos: vec2(),
+            dots: []
         },
     ])
 

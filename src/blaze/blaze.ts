@@ -46,7 +46,8 @@ export default function setupBlaze(rounds: number) {
             knockback: (direction: Vector, strength: number) => {
                 player.knockbackVel = player.knockbackVel.add(direction.scale(strength))
             },
-            otherPlayersPos: vec2()
+            otherPlayersPos: vec2(),
+            dots: []
         },
     ])
 
@@ -278,5 +279,6 @@ export default function setupBlaze(rounds: number) {
     onUpdate('friendly projectile', (proj) => {
         proj.pos = lerp(proj.pos, proj.targetPos, 0.9)
     })
+
     return player
 }

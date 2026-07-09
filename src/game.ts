@@ -1,10 +1,11 @@
 import { setupOtherPlayer } from "./otherPlayer"
 import { setupPlayer } from "./player"
-import { setupBackground, Trail } from "./background"
+import { setupBackground } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
 import { setDataListener, isHost, send, closeConnection, waitForPacket } from "./network"
 import { transition, ZLevels, type Ship } from "./main"
 import { getSelectedShip } from "./menu"
+import { Trail } from "./effects"
 
 export let paused = false
 export function setupGame() {

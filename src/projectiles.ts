@@ -1,11 +1,12 @@
 import type { AnchorComp, AreaComp, GameObj, OffScreenComp, PosComp, RotateComp, ScaleComp, SpriteComp } from "kaplay"
 import { angleBetween, type Vector } from "./game"
 import { send } from "./network"
-import type { BasicPlayerObject, CurrentPlayerObject, setupPlayer } from "./player"
+import type { BasicPlayerObject, setupPlayer } from "./player"
+import { DamageOverTime } from "./effects"
 
 type ProjectileType = 'cress laser' | 'fire missile'
 
-export type ProjectileData = {
+export interface ProjectileData {
     type: ProjectileType
     damage: number
     sprite: string
@@ -61,6 +62,8 @@ export const projFunctions: Record<ProjectileType, { update: updateFunction, onH
             player.hurt(self.damage)
             player.knockback(Vec2.fromAngle(self.direction), 200)
             player.stun(5)
+
+            player.dots.push(new DamageOverTime(5, 1000, 10))
         }
     }
 }
