@@ -41,8 +41,8 @@ const singleSprites: { name: string, path: string }[] = [
     { name: 'sound off', path: '/assets/sound off.png' },
     { name: 'blaze', path: '/assets/blaze/blaze.png' },
     { name: 'blaze blue', path: '/assets/blaze/blaze blue.png' },
-    { name: 'fire missile', path: '/assets/blaze/fire missile.png' },
-    { name: 'fire missile blue', path: '/assets/blaze/fire missile blue.png' },
+    { name: 'fire blast', path: '/assets/blaze/fire blast.png' },
+    { name: 'fire blast blue', path: '/assets/blaze/fire blast blue.png' },
 ]
 
 const sounds: { name: string, path: string }[] = [
@@ -306,4 +306,3 @@ setupTitle()
 setupMenu()
 setupGame()
 transition('menu')
-

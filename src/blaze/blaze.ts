@@ -7,7 +7,7 @@ import { HEALTHBAR_HEIGHT } from "../otherPlayer"
 import { shoot, type ProjectileData } from "../projectiles"
 
 export const MAX_AMMO = 2
-export const AMMO_REFRESH_TIME = 2
+export const AMMO_REFRESH_TIME = 1
 export default function setupBlaze(rounds: number) {
     const SPEED = 80
     const FRICTION = 0.8
@@ -193,19 +193,19 @@ export default function setupBlaze(rounds: number) {
         ammo--
         ammoBar.height = ammo / MAX_AMMO * AMMO_BAR_HEIGHT
 
-        const missile: ProjectileData = {
-            type: 'fire missile',
+        const blast: ProjectileData = {
+            type: 'fire blast',
             damage: 10,
-            sprite: 'fire missile',
-            pos: vec2(player.pos),
-            direction: player.angle + 180 + (shootOnLeftSide ? -10 : 10),
-            speed: 7,
+            sprite: 'fire blast',
+            pos: player.pos,
+            direction: 0,
+            speed: 0,
             sound: 'missile launch',
-            projId: rand(100000).toString()
+            projId: rand(10000).toString()
         }
-        shootOnLeftSide = !shootOnLeftSide
 
-        shoot(missile, true, ammo, player)
+        shoot(blast, true, ammo, player)
+
         if (ammo == 0 && ammoRefreshTimer == null) {
             shooting = false
             ammoBar.tween(0, AMMO_BAR_HEIGHT, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))

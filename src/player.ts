@@ -58,5 +58,9 @@ export function setupPlayer(rounds: number): CurrentPlayerObject {
         })
     })
 
+    onSceneLeave(() => {
+        player.dots = []
+    })
+
     return player
 }

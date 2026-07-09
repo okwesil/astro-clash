@@ -69,6 +69,7 @@ export default function setupOtherBlaze(rounds: number) {
             ammoBar.tween(0, player.height, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
         }
 
+        console.log(data.data)
         shoot(data.data, false, -1, player)
     })
 

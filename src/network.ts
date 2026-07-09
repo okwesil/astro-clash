@@ -24,11 +24,11 @@ const PEER_CONFIG = {
             {
                 urls: "stun:stun.relay.metered.ca:80",
             },
-            {
-                urls: "turn:standard.relay.metered.ca:80",
-                username: "e1d9bd163975135eac0144ef",
-                credential: "BZo6UPDzxTNZ8S1C",
-            },
+            // {
+            //     urls: "turn:standard.relay.metered.ca:80",
+            //     username: "e1d9bd163975135eac0144ef",
+            //     credential: "BZo6UPDzxTNZ8S1C",
+            // },
             {
                 urls: "turn:standard.relay.metered.ca:80?transport=tcp",
                 username: "e1d9bd163975135eac0144ef",

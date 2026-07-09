@@ -30,7 +30,7 @@ function menu(reason: string | undefined) {
 
     const songText = add([
         text(musicPlayer.song, { size: 30, font: 'pixel' }),
-        pos(soundToggle.pos.x + soundToggle.width + 10, height() + 40),
+        pos(60, height() + 40),
         anchor('botleft'),
         z(ZLevels.indexOf('ui')),
         timer()
