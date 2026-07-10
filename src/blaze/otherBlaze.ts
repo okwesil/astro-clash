@@ -47,13 +47,6 @@ export default function setupOtherBlaze(rounds: number) {
         player.pos = lerp(player.pos, player.targetPos, 0.8)
     })
 
-    player.onDraw(() => {
-        if (player.stunFrames > 0) {
-            drawStunCircle(vec2(), player.width, player.stunFrames)
-        }
-    })
-
-
     const ammoBar = add([
         rect(10, player.height),
         pos(), follow(player, vec2(-40, (player.height / 2))),
@@ -69,7 +62,6 @@ export default function setupOtherBlaze(rounds: number) {
             ammoBar.tween(0, player.height, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
         }
 
-        console.log(data.data)
         shoot(data.data, false, -1, player)
     })
 

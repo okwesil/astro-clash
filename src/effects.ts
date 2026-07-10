@@ -1,4 +1,4 @@
-import type { GameObj, PosComp, SpriteComp, RotateComp, ScaleComp, AnchorComp, KEventController, Circle, CircleComp } from "kaplay"
+import type { GameObj, PosComp, SpriteComp, RotateComp, ScaleComp, AnchorComp, KEventController, Circle, CircleComp, OpacityComp, TimerComp } from "kaplay"
 import type { Vector } from "./game"
 
 export class DamageOverTime {
@@ -17,17 +17,23 @@ export class DamageOverTime {
 
 }
 
-
-// for now only cirlces
-type ParticleFunction = () => GameObj<CircleComp | {
-    vel: Vector
+// function that creates a particle which is just a game object with a position component
+type Particle = GameObj<PosComp | OpacityComp | TimerComp | {
+    vel: Vector,
 }>
-export function emitPartilces(generate: ParticleFunction, amount: number, range: number) {
+
+// lifespan is in seconds
+export function emitParticles(create: () => Particle, amount: number, force: number, lifespan: number) {
     for (let i = 0; i < amount; i++) {
-        generate()
+        const particle = create()
+        particle.vel = Vec2.fromAngle(rand(360)).scale(force)
+        particle.tween(1, 0, 0.3, (value) => (particle.opacity = value))
+        particle.onUpdate(() => { particle.pos = particle.pos.add(particle.vel) })
+        particle.wait(lifespan, () => {
+            particle.destroy()
+        })
     }
 }
-
 
 type ObjectToFollow = GameObj<PosComp | SpriteComp | RotateComp | ScaleComp | AnchorComp>
 export class Trail {

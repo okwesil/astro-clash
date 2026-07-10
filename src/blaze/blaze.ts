@@ -178,7 +178,7 @@ export default function setupBlaze(rounds: number) {
         movePlayer(vec2(1, 0))
     })
 
-    onKeyRelease(['x', '/'], () => {
+    onButtonRelease('secondary', () => {
         if (paused || stunFrames > 0) return
     })
 
@@ -187,8 +187,7 @@ export default function setupBlaze(rounds: number) {
     const AMMO_BAR_HEIGHT = height() / 4
 
     let shooting = false
-    let shootOnLeftSide = true
-    onKeyPress(['z', '.'], () => {
+    onButtonPress('primary', () => {
         if (stunFrames > 0 || paused || ammo == 0) return
         ammo--
         ammoBar.height = ammo / MAX_AMMO * AMMO_BAR_HEIGHT

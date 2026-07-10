@@ -126,6 +126,10 @@ async function game(reset: boolean) {
         proj.destroy()
     })
 
+    otherPlayer.onCollide('friendly projectile', (proj) => {
+        createLaserCollisionParticles(proj.pos)
+    })
+
     player.onCollide('enemy railgun', (railgun) => {
         player.hurt(70)
         wait(0.2, () => {
@@ -133,6 +137,7 @@ async function game(reset: boolean) {
             new Trail(player, 100, 500, 0.5)
         })
     })
+
 
     otherPlayer.onCollide('friendly railgun', () => {
         new Trail(otherPlayer, 100, 500, 0.5)
@@ -152,9 +157,6 @@ async function game(reset: boolean) {
         })
     })
 
-    otherPlayer.onCollide('friendly projectile', (proj) => {
-        createLaserCollisionParticles(proj.pos)
-    })
 
     onCollide('enemy projectile', 'friendly projectile', (a, b) => {
         a.destroy()
@@ -276,7 +278,7 @@ async function game(reset: boolean) {
     ])
 
     onKeyPress('escape', () => {
-        if (escapeMessage.opacity == 1) {
+        if (escapeMessage.opacity > 0) {
             send('reasonForDisconnect', { reason: "the other player doesn't want to play with you anymore" })
             closeConnection("you left the match")
             transition('menu')

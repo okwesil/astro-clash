@@ -1,4 +1,4 @@
-import type { AnchorComp, AreaComp, GameObj, OffScreenComp, PosComp, RotateComp, ScaleComp, SpriteComp } from "kaplay"
+import type { AnchorComp, AreaComp, GameObj, OffScreenComp, OpacityComp, PosComp, RotateComp, ScaleComp, SpriteComp, TimerComp, TweenController } from "kaplay"
 import { angleBetween, type Vector } from "./game"
 import { send } from "./network"
 import type { BasicPlayerObject, setupPlayer } from "./player"
@@ -34,11 +34,17 @@ export const projFunctions: Record<ProjectileType, { update: updateFunction, onH
         }
     },
     'fire blast': {
-        update: (self, move, timeCreated) => {
+        update: (self, _, timeCreated) => {
             self.scale = self.scale.add(0.3)
-            if (Date.now() - timeCreated > 250) {
-                self.destroy()
-                send('deleteProjectiles', { projIds: [self.projId] })
+
+            // using speed as a boolean becuase this 'projectile' doesn't move
+            if (self.speed == 0 && Date.now() - timeCreated > 100) {
+                self.speed = 1
+                console.log('hi')
+                self.tween(1, 0, 0.2, (value) => (self.opacity = value))
+                wait(0.2, () => {
+                    send('deleteProjectiles', { projIds: [self.projId] })
+                })
             }
         },
         onHit: (player, self) => {
@@ -47,12 +53,12 @@ export const projFunctions: Record<ProjectileType, { update: updateFunction, onH
             player.stun(5)
 
             // add fire DOT
-            player.dots.push(new DamageOverTime(5, 500, 3))
+            player.dots.push(new DamageOverTime(5, 1000, 3))
         }
     }
 }
 
-export type ProjectileObject = GameObj<SpriteComp | PosComp | AreaComp | RotateComp | AnchorComp | OffScreenComp | ScaleComp | {
+export type ProjectileObject = GameObj<SpriteComp | PosComp | AreaComp | RotateComp | AnchorComp | OffScreenComp | ScaleComp | OpacityComp | TimerComp | {
     projId: string;
     type: ProjectileType
     speed: number;
@@ -71,6 +77,8 @@ export function shoot(data: ProjectileData, createdByCurrPlayer: boolean, newAmm
         anchor('center'),
         offscreen({ destroy: true, distance: 400 }),
         scale(1.5),
+        opacity(1),
+        timer(),
         (!createdByCurrPlayer ? 'enemy projectile' : 'friendly projectile'),
         'projectile',
         `${data.projId}`,

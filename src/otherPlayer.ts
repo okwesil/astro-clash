@@ -4,6 +4,8 @@ import setupOtherCress from "./cress/otherCress";
 import type { Vector } from "./game";
 import { ZLevels, type Ship } from "./main";
 import { setDataListener } from "./network";
+import { drawStunCircle } from "./player";
+import { emitParticles } from "./effects";
 
 
 export const HEALTHBAR_HEIGHT = 10
@@ -12,6 +14,7 @@ export type OtherPlayerObject = GameObj<PosComp | SpriteComp | ColorComp | Scale
     otherPlayersPos: Vector;
     blinking: boolean;
     blinkingFrequency: number;
+    stunFrames: number
 }>
 
 export function setupOtherPlayer(ship: Ship, rounds: number): OtherPlayerObject {
@@ -55,11 +58,31 @@ export function setupOtherPlayer(ship: Ship, rounds: number): OtherPlayerObject 
         if (currentValue < maxHP * 0.25) {
             player.blinkingFrequency = 1
         }
+
+        const redOrange = rgb(rand(180, 255), 0, 0)
+        emitParticles(() => add([
+            pos(player.pos),
+            circle(10),
+            color(redOrange),
+            timer(),
+            opacity(),
+            { vel: vec2() }
+        ]), 15, 5, .5)
     })
 
     setDataListener('movement', (data) => {
         player.targetPos.x = data.x
         player.targetPos.y = data.y
+    })
+
+    player.onDraw(() => {
+        if (player.stunFrames > 0) {
+            drawStunCircle(vec2(), player.width, player.stunFrames)
+        }
+    })
+
+    setDataListener('stunFrames', ({ frames }) => {
+        player.stunFrames = frames
     })
     return player
 }

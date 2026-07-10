@@ -3,7 +3,7 @@ import setupBlaze from "./blaze/blaze"
 import setupCress from "./cress/cress"
 import { type Vector } from "./game"
 import { getSelectedShip } from "./menu"
-import { Trail, type DamageOverTime } from "./effects"
+import { emitParticles, Trail, type DamageOverTime } from "./effects"
 
 export const MAX_STUN = 40
 
@@ -53,9 +53,21 @@ export function setupPlayer(rounds: number): CurrentPlayerObject {
                 dot.ticksLeft--
             }
 
-            new Trail(player, 50, 500, 0.5)
             return dot.ticksLeft > 0
         })
+    })
+
+    player.onHurt((amount) => {
+        console.log(amount)
+        const redOrange = rgb(rand(180, 255), 0, 0)
+        emitParticles(() => add([
+            pos(player.pos),
+            circle(10),
+            color(redOrange),
+            timer(),
+            opacity(),
+            { vel: vec2() }
+        ]), 15, 5, .5)
     })
 
     onSceneLeave(() => {

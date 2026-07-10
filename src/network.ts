@@ -114,17 +114,17 @@ type PacketMap = {
     recievedSelectedShip: null
     selectedShip: Ship
     movement: Vec2
-    projectileShot: { data: ProjectileData, newAmmo: number }
     ammo: { ammo: number }
+    projectileShot: { data: ProjectileData, newAmmo: number }
     projectilePositions: { pos: Vector[], projId: string[] }
     deleteProjectiles: { projIds: string[] }
     death: { hostWon: boolean; roundDied: number }
     healthChange: { maxHP: number, currentValue: number }
     stunFrames: { frames: number }
     railgunCharge: { completion: number }
-    stoppedRailgunCharge: null
     aimingRailgun: { angle: number }
     fireRailgun: null
+    stoppedRailgunCharge: null
     endOfCooldown: { sentByHost: boolean }
     currentState: { score: { host: number, other: number }, rounds: number }
     reasonForDisconnect: { reason: string }

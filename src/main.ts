@@ -11,6 +11,14 @@ kaplay({
     stretch: true,
     letterbox: true,
     crisp: true,
+    buttons: {
+        primary: {
+            keyboard: ['z', '.']
+        },
+        secondary: {
+            keyboard: ['x', '/']
+        }
+    }
 })
 console.log('main.ts loaded', window.location.href)
 

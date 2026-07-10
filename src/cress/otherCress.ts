@@ -54,10 +54,6 @@ export default function setupOtherCress(rounds: number) {
             drawRailgunAimingLine(vec2(), 0, railgunChargeCompletion)
             drawChargeCircle(vec2(), player.width, railgunChargeCompletion)
         }
-
-        if (player.stunFrames > 0) {
-            drawStunCircle(vec2(), player.width, player.stunFrames)
-        }
     })
 
     const ammoBar = add([
