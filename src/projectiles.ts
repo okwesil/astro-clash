@@ -14,6 +14,7 @@ export interface ProjectileData {
     direction: number
     speed: number
     sound: string
+    hitboxScale: number
     projId: string
 }
 
@@ -72,7 +73,7 @@ export function shoot(data: ProjectileData, createdByCurrPlayer: boolean, newAmm
     const proj = add([
         sprite(data.sprite + (!createdByCurrPlayer ? ' blue' : '')),
         pos(data.pos.x, data.pos.y),
-        area({ scale: data.type == 'fire blast' ? 0.9 : 1.2 }),
+        area({ scale: data.hitboxScale }),
         rotate(data.direction),
         anchor('center'),
         offscreen({ destroy: true, distance: 400 }),

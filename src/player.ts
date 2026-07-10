@@ -58,7 +58,6 @@ export function setupPlayer(rounds: number): CurrentPlayerObject {
     })
 
     player.onHurt((amount) => {
-        console.log(amount)
         const redOrange = rgb(rand(180, 255), 0, 0)
         emitParticles(() => add([
             pos(player.pos),
@@ -67,7 +66,15 @@ export function setupPlayer(rounds: number): CurrentPlayerObject {
             timer(),
             opacity(),
             { vel: vec2() }
-        ]), 15, 5, .5)
+        ]), 15, 5, 360, .5)
+    })
+
+    player.onCollide('blaze', (blaze) => {
+        if (blaze.dashing) {
+            player.hurt(5)
+            // send to the left or right of the blaze
+            player.knockback(Vec2.fromAngle(blaze.angle + (randi() ? 180 : 0)), 800)
+        }
     })
 
     onSceneLeave(() => {

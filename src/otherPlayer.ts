@@ -67,7 +67,7 @@ export function setupOtherPlayer(ship: Ship, rounds: number): OtherPlayerObject 
             timer(),
             opacity(),
             { vel: vec2() }
-        ]), 15, 5, .5)
+        ]), 15, 5, 360, .5)
     })
 
     setDataListener('movement', (data) => {

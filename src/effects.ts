@@ -23,10 +23,10 @@ type Particle = GameObj<PosComp | OpacityComp | TimerComp | {
 }>
 
 // lifespan is in seconds
-export function emitParticles(create: () => Particle, amount: number, force: number, lifespan: number) {
+export function emitParticles(create: () => Particle, amount: number, force: number, range: number, lifespan: number) {
     for (let i = 0; i < amount; i++) {
         const particle = create()
-        particle.vel = Vec2.fromAngle(rand(360)).scale(force)
+        particle.vel = Vec2.fromAngle(rand(range)).scale(force)
         particle.tween(1, 0, 0.3, (value) => (particle.opacity = value))
         particle.onUpdate(() => { particle.pos = particle.pos.add(particle.vel) })
         particle.wait(lifespan, () => {
@@ -44,7 +44,7 @@ export class Trail {
     items: { pos: Vector, angle: number, timeCreated: number }[] = []
     // in milliseconds
     lifespan: number
-    // in seconds
+    // in milliseconds
     trailLifespan: number
     dead: boolean = false
     eventController: KEventController
@@ -53,8 +53,25 @@ export class Trail {
         this.object = obj
         this.delay = delay
         this.lifespan = lifespan
-        this.trailLifespan = trailLifespan
-        this.eventController = onUpdate(this.update)
+        this.trailLifespan = trailLifespan / 1000
+        this.eventController = onUpdate(() => this.update())
+
+        onDraw(() => {
+            const now = Date.now()
+            this.items = this.items.filter(item => {
+                const opacity = 1 - (now - item.timeCreated) / this.lifespan
+                drawSprite({
+                    pos: item.pos,
+                    angle: item.angle,
+                    sprite: this.object.sprite,
+                    anchor: this.object.anchor,
+                    scale: this.object.scale,
+                    opacity,
+                })
+
+                return opacity > 0
+            })
+        })
     }
 
 
@@ -64,6 +81,7 @@ export class Trail {
 
     update() {
         if (this.dead && this.items.length == 0) {
+            console.log('dead')
             this.eventController.cancel()
             return
         }
@@ -82,23 +100,5 @@ export class Trail {
     }
 
     draw() {
-        const now = Date.now()
-        this.items = this.items.filter(item => {
-            const opacity = 1 - (now - item.timeCreated) / this.lifespan
-            drawSprite({
-                pos: item.pos,
-                angle: item.angle,
-                sprite: this.object.sprite,
-                anchor: this.object.anchor,
-                scale: this.object.scale,
-                opacity,
-            })
-
-            return (now - item.timeCreated) < this.lifespan
-        })
-    }
-
-    kill() {
-        this.dead = true
     }
 }

@@ -5,6 +5,7 @@ import { isHost, send, setDataListener } from "../network"
 import { drawStunCircle, MAX_STUN } from "../player"
 import { HEALTHBAR_HEIGHT } from "../otherPlayer"
 import { shoot, type ProjectileData } from "../projectiles"
+import { Trail } from "../effects"
 
 export const MAX_AMMO = 2
 export const AMMO_REFRESH_TIME = 1
@@ -20,7 +21,7 @@ export default function setupBlaze(rounds: number) {
     }
 
     const player = add([
-        health(100, 100),
+        health(150, 150),
         pos(startPos),
         sprite('blaze'),
         color(),
@@ -155,7 +156,7 @@ export default function setupBlaze(rounds: number) {
 
     const movePlayer = (direction: Vector) => {
         let speed = shooting ? SPEED * 0.3 : SPEED
-        player.vel = player.vel.add(direction.scale(speed))
+        player.vel = player.vel.add(direction.unit().scale(speed))
     }
 
     onKeyDown(['w', 'up'], () => {
@@ -178,8 +179,25 @@ export default function setupBlaze(rounds: number) {
         movePlayer(vec2(1, 0))
     })
 
-    onButtonRelease('secondary', () => {
-        if (paused || stunFrames > 0) return
+    const DASH_SCALE = 5
+    const DASH_REFRESH = 1000
+    let lastDashTime = Date.now()
+    onButtonPress('secondary', () => {
+        if (paused || stunFrames > 0 || player.vel.len() < 1 || (Date.now() - lastDashTime) < DASH_REFRESH) return
+
+        new Trail(player, 50, 500, 500)
+        send('startedDashing', null)
+
+        wait(0.5, () => {
+            send('stoppedDashing', null)
+        })
+
+        wait(0.1, () => {
+            const length = player.vel.len()
+            player.vel = player.vel.unit().scale(length * DASH_SCALE)
+        })
+
+        lastDashTime = Date.now()
     })
 
     let ammo = MAX_AMMO
@@ -194,12 +212,13 @@ export default function setupBlaze(rounds: number) {
 
         const blast: ProjectileData = {
             type: 'fire blast',
-            damage: 10,
+            damage: 5,
             sprite: 'fire blast',
             pos: player.pos,
             direction: 0,
             speed: 0,
             sound: 'missile launch',
+            hitboxScale: 0.7,
             projId: rand(10000).toString()
         }
 

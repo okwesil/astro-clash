@@ -27,6 +27,7 @@ export default function setupOtherCress(rounds: number) {
         opacity(1),
         'cress',
         'player',
+        'other player',
         {
             targetPos: startPos,
             otherPlayersPos: vec2(),

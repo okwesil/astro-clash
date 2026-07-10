@@ -4,6 +4,8 @@ import { setDataListener, isHost } from "../network"
 import { AMMO_REFRESH_TIME, MAX_AMMO } from "./blaze"
 import { shoot } from "../projectiles"
 import { drawStunCircle } from "../player"
+import { Trail } from "../effects"
+import type { CircleComp, ColorComp, GameObj, PosComp } from "kaplay"
 
 
 export default function setupOtherBlaze(rounds: number) {
@@ -25,12 +27,14 @@ export default function setupOtherBlaze(rounds: number) {
         opacity(1),
         'blaze',
         'player',
+        'other player',
         {
             targetPos: startPos,
             otherPlayersPos: vec2(),
             blinking: false,
             blinkingFrequency: 8,
-            stunFrames: 0
+            stunFrames: 0,
+            dashing: false
         }
     ])
 
@@ -54,7 +58,6 @@ export default function setupOtherBlaze(rounds: number) {
         color(BLUE),
         timer()
     ])
-
     setDataListener('projectileShot', (data) => {
         if (data.newAmmo > 0) {
             ammoBar.height = data.newAmmo / MAX_AMMO * player.height
@@ -67,6 +70,17 @@ export default function setupOtherBlaze(rounds: number) {
 
     setDataListener('ammo', ({ ammo }) => {
         ammoBar.height = ammo / MAX_AMMO * player.height
+    })
+
+    setDataListener('startedDashing', () => {
+        player.dashing = true
+        new Trail(player, 50, 500, 500)
+        player.area.scale = vec2(3)
+    })
+
+    setDataListener('stoppedDashing', () => {
+        player.dashing = false
+        player.area.scale = vec2(1)
     })
 
     return player

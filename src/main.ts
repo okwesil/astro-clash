@@ -13,10 +13,10 @@ kaplay({
     crisp: true,
     buttons: {
         primary: {
-            keyboard: ['z', '.']
+            keyboard: ['z', 'k']
         },
         secondary: {
-            keyboard: ['x', '/']
+            keyboard: ['x', 'l']
         }
     }
 })
