@@ -1,9 +1,10 @@
-import kaplay, { type AudioPlay } from "kaplay"
+import kaplay, { type AreaComp, type AudioPlay, type GameObj, type ScaleComp, type TimerComp } from "kaplay"
 import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
 import { setupTitle } from "./title"
 import { BG_COLOR, setupBackground } from "./background"
+import { setupSelect } from "./select"
 
 kaplay({
     width: 900,
@@ -296,7 +297,8 @@ const fpsVisual = add([
         size: 20,
         font: 'pixel'
     }),
-    pos(vec2(20)),
+    pos(width() - 10, 10),
+    anchor('topright'),
     area(),
     opacity(1),
     stay(),
@@ -309,9 +311,14 @@ const fpsVisual = add([
     }
 ])
 
+loadShaderURL('crt-tv', null, '/assets/shaders/crt.glsl')
+// loadShaderURL('background', null, '/assets/shaders/background.glsl')
+usePostEffect('crt-tv');
+
 
 setupBackground()
 setupTitle()
+setupSelect()
 setupMenu()
 setupGame()
 transition('title')

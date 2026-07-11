@@ -4,7 +4,7 @@ import { setupBackground } from "./background"
 import { createLaserCollisionParticles, projFunctions } from "./projectiles"
 import { setDataListener, isHost, send, closeConnection } from "./network"
 import { transition, ZLevels, type Ship } from "./main"
-import { getSelectedShip } from "./menu"
+import { getSelectedShip } from "./select"
 import { Trail } from "./effects"
 
 export let paused = false

@@ -1,16 +1,12 @@
 import { setupBackground } from './background'
-import { musicPlayer, shipDescriptions, ships, transition, ZLevels, type Ship } from './main'
+import { musicPlayer, transition, ZLevels } from './main'
 import { connect, peerId, setConnectionListener, setOnError } from './network'
-import type { Vector } from './game'
-import type { GameObj, SpriteComp, PosComp, AnchorComp, TimerComp, ScaleComp, RotateComp } from 'kaplay'
 
 
 export function setupMenu() {
     scene('menu', menu)
 }
 
-let selectedShipIndex = 0
-export const getSelectedShip = (): Ship => ships[selectedShipIndex]
 function menu(reason: string | undefined) {
     setConnectionListener('close', (reason) => transition('menu', reason))
     setBackground(BLACK)
@@ -19,10 +15,31 @@ function menu(reason: string | undefined) {
         transition('game', true)
     })
 
+
+    const back = add([
+        pos(10, 10),
+        text('<- back'),
+        area(),
+        scale(),
+        timer(),
+    ])
+
+    back.onClick(() => {
+        transition('select')
+    })
+
+    back.onHover(() => {
+        back.tween(vec2(1), vec2(1.2), 0.3, (value) => (back.scale = value))
+    })
+
+    back.onHoverEnd(() => {
+        back.tween(vec2(1.2), vec2(1), 0.3, (value) => (back.scale = value))
+    })
+
     const soundToggle = add([
         sprite(musicPlayer.isPlaying ? 'sound on' : 'sound off'),
-        area(),
-        pos(10, height() + 70),
+        area({ offset: vec2(0, 10) }),
+        pos(30, height() + 100),
         anchor('botleft'),
         timer(),
         z(ZLevels.indexOf('ui')),
@@ -30,23 +47,24 @@ function menu(reason: string | undefined) {
 
     const songText = add([
         text(musicPlayer.song, { size: 30, font: 'pixel' }),
-        pos(80, height() + 40),
+        pos(100, height() + 100),
         anchor('botleft'),
         z(ZLevels.indexOf('ui')),
         timer()
     ])
 
-    soundToggle.tween(height() + soundToggle.height, height() - 10, 0.3, (value) => (soundToggle.pos.y = value))
+    const TOP_Y = height() - 40
+    soundToggle.tween(height() + soundToggle.height, TOP_Y, 0.3, (value) => (soundToggle.pos.y = value))
     if (musicPlayer.isPlaying)
-        songText.tween(height() + songText.height, height() - 15, 0.3, (value) => (songText.pos.y = value))
+        songText.tween(height() + songText.height, TOP_Y, 0.3, (value) => (songText.pos.y = value))
 
     musicPlayer.onChangeState = (isPlaying, song) => {
         if (isPlaying) {
             soundToggle.sprite = 'sound on'
-            songText.tween(height() + songText.height, height() - 15, 0.3, (value) => (songText.pos.y = value))
+            songText.tween(height() + songText.height, TOP_Y, 0.3, (value) => (songText.pos.y = value))
         } else {
             soundToggle.sprite = 'sound off'
-            songText.tween(height() - 15, height() + songText.height, 0.3, (value) => (songText.pos.y = value))
+            songText.tween(TOP_Y, height() + songText.height, 0.3, (value) => (songText.pos.y = value))
         }
         songText.text = song
     }
@@ -57,8 +75,8 @@ function menu(reason: string | undefined) {
     })
 
     const idText = add([
-        pos(vec2(width() / 2, 20)),
-        anchor('top'),
+        pos(vec2(width() / 2, height() / 2)),
+        anchor('bot'),
         text('generating ID', {
             size: 60,
             width: width(),
@@ -80,7 +98,7 @@ function menu(reason: string | undefined) {
     // input background so stars does mess it up
     const startingMessage = 'type the id of the player you want to join'
     const input = add([
-        pos(width() / 2, 90),
+        pos(center()),
         anchor('top'),
         text(startingMessage, {
             size: 30,
@@ -99,8 +117,8 @@ function menu(reason: string | undefined) {
     })
     let connecting = false
     const connectingText = add([
-        pos(vec2(width() / 2, 140)),
-        anchor('center'),
+        pos(width() / 2, height() / 2 + 200),
+        anchor('top'),
         text(reason ? reason : 'connecting...', {
             size: 30,
             width: 500,
@@ -134,7 +152,7 @@ function menu(reason: string | undefined) {
         }
     })
 
-    onKeyPress('escape', () => transition('title'))
+    onKeyPress('escape', () => transition('select'))
 
     idText.onClick(() => {
         if (_peerId) {
@@ -147,99 +165,5 @@ function menu(reason: string | undefined) {
         }
     })
 
-    const shipName = add([
-        text(ships[selectedShipIndex], {
-            size: 50, font: 'pixel'
-        }),
-        pos(width() / 2, height() / 2 + 170),
-        anchor('bot'),
-    ])
-
-    const shipDescriptionText = add([
-        text(shipDescriptions[selectedShipIndex], {
-            size: 30, font: 'pixel', width: width() - 200
-        }),
-        pos(width() / 2, height() - 180),
-        anchor('center'),
-    ])
-
-    const SHIP_SCALE = 4
-    // all ship sprites are 50 x 50
-    const SHIP_WIDTH = 50
-    const SHIP_SPACING = SHIP_WIDTH * SHIP_SCALE + 100
-    function calculateShipPosition(index: number): Vector {
-        return vec2(width() / 2 + (SHIP_SPACING * index) - selectedShipIndex * SHIP_SPACING, height() / 2 - 30)
-    }
-
-    function repositionShips(direction: 'left' | 'right') {
-        for (let i = 0; i < ships.length; i++) {
-            const ship = shipObjects[i]
-            if (i == selectedShipIndex) {
-                ship.tween(ship.scale, vec2(SHIP_SCALE + 2.5), 0.2, (value) => (ship.scale = value))
-            } else {
-                ship.tween(ship.scale, vec2(SHIP_SCALE), 0.2, (value) => (ship.scale = value))
-            }
-            ship.tween(ship.pos, calculateShipPosition(i), 0.2 + (direction == 'right' ? (0.1 * i) : (0.1 * (ships.length - i))), (value) => (ship.pos = value))
-        }
-
-        shipDescriptionText.text = shipDescriptions[selectedShipIndex]
-        shipName.text = ships[selectedShipIndex]
-    }
-
-    onKeyPress('right', () => {
-        selectedShipIndex = (selectedShipIndex + 1) % ships.length
-        repositionShips('right')
-    })
-
-    onKeyPress('left', () => {
-        selectedShipIndex--
-        if (selectedShipIndex < 0) selectedShipIndex = ships.length - 1
-        repositionShips('left')
-    })
-
-    // ship selection
-    type ShipObject = GameObj<SpriteComp | PosComp | AnchorComp | TimerComp | ScaleComp | RotateComp>
-    const shipObjects: ShipObject[] = []
-    for (let i = 0; i < ships.length; i++) {
-        let position = calculateShipPosition(i)
-        const obj = add([
-            pos(position),
-            anchor('center'),
-            sprite(ships[i]),
-            scale(SHIP_SCALE),
-            rotate(),
-            timer(),
-            area(),
-            z(ZLevels.indexOf('ui'))
-        ])
-
-        const rotationSpeed = rand(1, 3)
-        obj.onUpdate(() => {
-            obj.angle += rotationSpeed
-        })
-
-        obj.onHover(() => {
-            if (selectedShipIndex == i) return
-            obj.tween(vec2(SHIP_SCALE), vec2(SHIP_SCALE).add(1), 0.2, (value) => (obj.scale = value))
-        })
-
-        obj.onHoverEnd(() => {
-            if (selectedShipIndex == i) return
-            obj.tween(vec2(SHIP_SCALE).add(1), vec2(SHIP_SCALE), 0.2, (value) => (obj.scale = value))
-        })
-
-        obj.onClick(() => {
-            const prevIndex = selectedShipIndex
-            selectedShipIndex = i
-            if (i < prevIndex) {
-                repositionShips('right')
-            } else {
-                repositionShips('left')
-            }
-
-        })
-        shipObjects.push(obj)
-    }
-    repositionShips('left')
 }
 

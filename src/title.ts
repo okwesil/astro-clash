@@ -26,9 +26,9 @@ function title() {
         animate()
     ])
 
-    logo.tween(-200, 20, 2, (value) => (logo.pos.y = value), easeOutElastic)
+    logo.tween(-200, 50, 2, (value) => (logo.pos.y = value), easeOutElastic)
     wait(3, () => {
-        logo.animate('pos', [vec2(width() / 2, 40), vec2(width() / 2, 20)], { duration: 3, direction: 'ping-pong' })
+        logo.animate('pos', [vec2(width() / 2, 60), vec2(width() / 2, 50)], { duration: 3, direction: 'ping-pong' })
     })
 
     const rectangle = add([
@@ -51,7 +51,7 @@ function title() {
 
     rectangle.onClick(() => {
         musicPlayer.startMusic()
-        transition('menu')
+        transition('select')
     })
 
     onKeyRelease('enter', () => {

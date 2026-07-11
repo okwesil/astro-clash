@@ -2,7 +2,7 @@ import type { GameObj, HealthComp, PosComp, SpriteComp, ColorComp, AreaComp, Rot
 import setupBlaze from "./blaze/blaze"
 import setupCress from "./cress/cress"
 import { type Vector } from "./game"
-import { getSelectedShip } from "./menu"
+import { getSelectedShip } from "./select"
 import { emitParticles, type DamageOverTime } from "./effects"
 
 export function movePlayer(player: CurrentPlayerObject, direction: Vector, speed: number) {
