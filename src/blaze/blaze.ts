@@ -206,7 +206,6 @@ export default function setupBlaze(rounds: number) {
     let ammoRefreshTimer: TimerController | null = null
     const AMMO_BAR_HEIGHT = height() / 4
 
-    let shooting = false
     onButtonPress('primary', () => {
         if (stunFrames > 0 || paused || ammo == 0) return
         ammo--
@@ -227,7 +226,6 @@ export default function setupBlaze(rounds: number) {
         shoot(blast, true, ammo, player)
 
         if (ammo == 0 && ammoRefreshTimer == null) {
-            shooting = false
             ammoBar.tween(0, AMMO_BAR_HEIGHT, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
             ammoBarOutline.animation.paused = false
             ammoRefreshTimer = wait(AMMO_REFRESH_TIME, () => {

@@ -1,4 +1,4 @@
-import type { AnchorComp, AreaComp, GameObj, OffScreenComp, OpacityComp, PosComp, RotateComp, ScaleComp, SpriteComp, TimerComp, TweenController } from "kaplay"
+import type { AnchorComp, AreaComp, GameObj, OffScreenComp, OpacityComp, PosComp, RotateComp, ScaleComp, SpriteComp, TimerComp } from "kaplay"
 import { angleBetween, type Vector } from "./game"
 import { send } from "./network"
 import type { BasicPlayerObject, setupPlayer } from "./player"

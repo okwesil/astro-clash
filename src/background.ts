@@ -1,4 +1,3 @@
-import type { AnchorComp, GameObj, PosComp, RotateComp, ScaleComp, SpriteComp } from "kaplay"
 import type { Vector } from "./game"
 import { ZLevels } from "./main"
 
