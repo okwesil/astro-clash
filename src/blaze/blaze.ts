@@ -2,13 +2,14 @@ import type { TimerController } from "kaplay"
 import { angleBetween, paused, type Vector } from "../game"
 import { ZLevels } from "../main"
 import { isHost, send, setDataListener } from "../network"
-import { drawStunCircle, MAX_STUN } from "../player"
+import { drawStunCircle, MAX_STUN, movePlayer } from "../player"
 import { HEALTHBAR_HEIGHT } from "../otherPlayer"
 import { shoot, type ProjectileData } from "../projectiles"
 import { Trail } from "../effects"
 
 export const MAX_AMMO = 2
 export const AMMO_REFRESH_TIME = 1
+export const FIRE_TOTAL_DAMAGE = 20
 export default function setupBlaze(rounds: number) {
     const SPEED = 80
     const FRICTION = 0.8
@@ -21,7 +22,7 @@ export default function setupBlaze(rounds: number) {
     }
 
     const player = add([
-        health(150, 150),
+        health(130, 130),
         pos(startPos),
         sprite('blaze'),
         color(),
@@ -32,6 +33,7 @@ export default function setupBlaze(rounds: number) {
         z(ZLevels.indexOf('current player')),
         anchor("center"),
         opacity(1),
+        timer(),
         'current player',
         'blaze',
         'player',
@@ -154,48 +156,48 @@ export default function setupBlaze(rounds: number) {
     })
 
 
-    const movePlayer = (direction: Vector) => {
-        let speed = shooting ? SPEED * 0.3 : SPEED
-        player.vel = player.vel.add(direction.unit().scale(speed))
-    }
-
     onKeyDown(['w', 'up'], () => {
         if (stunFrames > 0 || paused) return
-        movePlayer(vec2(0, -1))
+        movePlayer(player, vec2(0, -1), SPEED)
     })
 
     onKeyDown(['s', 'down'], () => {
         if (stunFrames > 0 || paused) return
-        movePlayer(vec2(0, 1))
+        movePlayer(player, vec2(0, 1), SPEED)
     })
 
     onKeyDown(['a', 'left'], () => {
         if (stunFrames > 0 || paused) return
-        movePlayer(vec2(-1, 0))
+        movePlayer(player, vec2(-1, 0), SPEED)
     })
 
     onKeyDown(['d', 'right'], () => {
         if (stunFrames > 0 || paused) return
-        movePlayer(vec2(1, 0))
+        movePlayer(player, vec2(1, 0), SPEED)
     })
 
     const DASH_SCALE = 5
     const DASH_REFRESH = 1000
     let lastDashTime = Date.now()
     onButtonPress('secondary', () => {
-        if (paused || stunFrames > 0 || player.vel.len() < 1 || (Date.now() - lastDashTime) < DASH_REFRESH) return
+        if (paused || stunFrames > 0 || player.vel.len() < SPEED || (Date.now() - lastDashTime) < DASH_REFRESH) return
+        console.log('current speed', player.vel.len())
 
         new Trail(player, 50, 500, 500)
+        player.tween(player.scale, vec2(2), 0.1, (value) => (player.scale = value))
         send('startedDashing', null)
+
+        // apply the dash
+        wait(0.1, () => {
+            player.vel = player.vel.scale(DASH_SCALE)
+            play('dash', { volume: 0.2 })
+        })
 
         wait(0.5, () => {
             send('stoppedDashing', null)
+            player.tween(player.scale, vec2(1.2), 0.1, (value) => (player.scale = value))
         })
 
-        wait(0.1, () => {
-            const length = player.vel.len()
-            player.vel = player.vel.unit().scale(length * DASH_SCALE)
-        })
 
         lastDashTime = Date.now()
     })
@@ -217,7 +219,7 @@ export default function setupBlaze(rounds: number) {
             pos: player.pos,
             direction: 0,
             speed: 0,
-            sound: 'missile launch',
+            sound: 'fire blast',
             hitboxScale: 0.7,
             projId: rand(10000).toString()
         }

@@ -2,7 +2,7 @@ import type { AudioPlay, TimerController } from "kaplay"
 import { angleBetween, paused, type Vector } from "../game"
 import { ZLevels } from "../main"
 import { isHost, send, setDataListener } from "../network"
-import { drawStunCircle, MAX_STUN } from "../player"
+import { drawStunCircle, MAX_STUN, movePlayer } from "../player"
 import { shoot, type ProjectileData } from "../projectiles"
 import { HEALTHBAR_HEIGHT } from "../otherPlayer"
 
@@ -41,7 +41,7 @@ export function fireRailgun(position: Vector, angle: number, red: boolean) {
         area({ scale: vec2(0.2, 1) }),
         rotate(angle),
         z(ZLevels.indexOf('railgun')),
-        scale(vec2(1, 1.5)),
+        scale(vec2(2, 1.5)),
         (red ? 'friendly railgun' : 'enemy railgun')
     ])
 
@@ -238,6 +238,7 @@ export default function setupCress(rounds: number) {
         if (stunFrames > 0) {
             drawStunCircle(vec2(), player.width + 3, stunFrames)
         }
+
         if (elapsedCharge > 0) {
             drawChargeCircle(vec2(), player.width + 3, elapsedCharge / RAILGUN_CHARGE_TIME)
             drawRailgunAimingLine(vec2(), 0, elapsedCharge / RAILGUN_CHARGE_TIME)
@@ -245,19 +246,14 @@ export default function setupCress(rounds: number) {
     })
 
 
-    const movePlayer = (direction: Vector) => {
-        let speed = shooting ? SPEED * 0.3 : SPEED
-        player.vel = player.vel.add(direction.scale(speed))
-    }
-
     onKeyDown(['w', 'up'], () => {
         if (stunFrames > 0 || elapsedCharge != 0) return
-        movePlayer(vec2(0, -1))
+        movePlayer(player, vec2(0, -1), SPEED)
     })
 
     onKeyDown(['s', 'down'], () => {
         if (stunFrames > 0 || elapsedCharge != 0) return
-        movePlayer(vec2(0, 1))
+        movePlayer(player, vec2(0, 1), SPEED)
     })
 
 
@@ -273,7 +269,7 @@ export default function setupCress(rounds: number) {
             return
         }
 
-        movePlayer(vec2(-1, 0))
+        movePlayer(player, vec2(-1, 0), SPEED)
     })
 
     onKeyDown(['d', 'right'], () => {
@@ -284,7 +280,7 @@ export default function setupCress(rounds: number) {
             return
         }
 
-        movePlayer(vec2(1, 0))
+        movePlayer(player, vec2(1, 0), SPEED)
     })
 
     onKeyRelease(['a', 'left', 'd', 'right'], () => {

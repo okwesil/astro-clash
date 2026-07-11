@@ -8,10 +8,10 @@ export class DamageOverTime {
     damage: number
     lastTickTime: number
 
-    constructor(amountOfTicks: number, interval: number, damage: number) {
+    constructor(amountOfTicks: number, interval: number, totalDamage: number) {
         this.ticksLeft = amountOfTicks
         this.interval = interval
-        this.damage = damage
+        this.damage = totalDamage / amountOfTicks
         this.lastTickTime = Date.now() + interval
     }
 
@@ -36,53 +36,60 @@ export function emitParticles(create: () => Particle, amount: number, force: num
 }
 
 type ObjectToFollow = GameObj<PosComp | SpriteComp | RotateComp | ScaleComp | AnchorComp>
+type Shadow = {
+    pos: Vector
+    angle: number
+    timeCreated: number
+    scale: Vector
+}
+
 export class Trail {
     object: ObjectToFollow
     // in milliseconds
     delay: number
     lastShadowTime = Date.now()
-    items: { pos: Vector, angle: number, timeCreated: number }[] = []
+    shadows: Shadow[] = []
     // in milliseconds
     lifespan: number
     // in milliseconds
     trailLifespan: number
     dead: boolean = false
-    eventController: KEventController
+    eventControllers: KEventController[]
 
     constructor(obj: ObjectToFollow, delay: number, lifespan: number, trailLifespan: number) {
         this.object = obj
         this.delay = delay
         this.lifespan = lifespan
         this.trailLifespan = trailLifespan / 1000
-        this.eventController = onUpdate(() => this.update())
 
-        onDraw(() => {
+        this.eventControllers = [onUpdate(() => this.update()), onDraw(() => {
             const now = Date.now()
-            this.items = this.items.filter(item => {
-                const opacity = 1 - (now - item.timeCreated) / this.lifespan
+            this.shadows = this.shadows.filter(shadow => {
+                const percentDeath = 1 - (now - shadow.timeCreated) / this.lifespan
                 drawSprite({
-                    pos: item.pos,
-                    angle: item.angle,
+                    pos: shadow.pos,
+                    angle: shadow.angle,
                     sprite: this.object.sprite,
                     anchor: this.object.anchor,
-                    scale: this.object.scale,
-                    opacity,
+                    scale: shadow.scale.scale(percentDeath),
+                    opacity: percentDeath,
                 })
 
-                return opacity > 0
+                return percentDeath > 0
             })
-        })
+        })]
     }
 
 
     get lastItem() {
-        return this.items.length > 0 ? null : this.items[this.items.length - 1]
+        return this.shadows.length > 0 ? null : this.shadows[this.shadows.length - 1]
     }
 
     update() {
-        if (this.dead && this.items.length == 0) {
+        if (this.dead && this.shadows.length == 0) {
             console.log('dead')
-            this.eventController.cancel()
+            // clean up
+            this.eventControllers.forEach(event => event.cancel())
             return
         }
 
@@ -94,7 +101,7 @@ export class Trail {
 
         const now = Date.now()
         if (!this.dead && (now - this.lastShadowTime) > this.delay) {
-            this.items.push({ pos: this.object.pos, timeCreated: now, angle: this.object.angle })
+            this.shadows.push({ pos: this.object.pos, timeCreated: now, angle: this.object.angle, scale: this.object.scale })
             this.lastShadowTime = now
         }
     }

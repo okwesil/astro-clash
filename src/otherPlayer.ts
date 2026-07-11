@@ -59,11 +59,11 @@ export function setupOtherPlayer(ship: Ship, rounds: number): OtherPlayerObject 
             player.blinkingFrequency = 1
         }
 
-        const redOrange = rgb(rand(180, 255), 0, 0)
+        const blue = rgb(0, 0, rand(180, 255))
         emitParticles(() => add([
             pos(player.pos),
             circle(10),
-            color(redOrange),
+            color(blue),
             timer(),
             opacity(),
             { vel: vec2() }

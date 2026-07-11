@@ -3,6 +3,7 @@ import { angleBetween, type Vector } from "./game"
 import { send } from "./network"
 import type { BasicPlayerObject, setupPlayer } from "./player"
 import { DamageOverTime } from "./effects"
+import { FIRE_TOTAL_DAMAGE } from "./blaze/blaze"
 
 type ProjectileType = 'cress laser' | 'fire blast'
 
@@ -54,7 +55,7 @@ export const projFunctions: Record<ProjectileType, { update: updateFunction, onH
             player.stun(5)
 
             // add fire DOT
-            player.dots.push(new DamageOverTime(5, 1000, 3))
+            player.dots.push(new DamageOverTime(5, 1000, FIRE_TOTAL_DAMAGE))
         }
     }
 }

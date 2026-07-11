@@ -58,7 +58,8 @@ const sounds: { name: string, path: string }[] = [
     { name: 'railgun charging', path: 'assets/cress/sounds/railgun-charging.mp3' },
     { name: 'railgun firing', path: 'assets/cress/sounds/railgun-fire.mp3' },
     { name: 'boom', path: '/assets/sounds/boom.mp3' },
-    { name: 'missile launch', path: '/assets/blaze/sounds/missile launch.mp3' },
+    { name: 'fire blast', path: '/assets/blaze/sounds/fire blast.mp3' },
+    { name: 'dash', path: '/assets/blaze/sounds/dash.mp3' },
 ]
 
 export const ships = [

@@ -3,7 +3,14 @@ import setupBlaze from "./blaze/blaze"
 import setupCress from "./cress/cress"
 import { type Vector } from "./game"
 import { getSelectedShip } from "./menu"
-import { emitParticles, Trail, type DamageOverTime } from "./effects"
+import { emitParticles, type DamageOverTime } from "./effects"
+
+export function movePlayer(player: CurrentPlayerObject, direction: Vector, speed: number) {
+    player.vel = player.vel.add(direction.unit().scale(speed))
+
+    // normalize so diagonals arent faster than straight
+    player.vel = player.vel.unit().scale(player.vel.len())
+}
 
 export const MAX_STUN = 40
 
@@ -57,16 +64,20 @@ export function setupPlayer(rounds: number): CurrentPlayerObject {
         })
     })
 
-    player.onHurt((amount) => {
-        const redOrange = rgb(rand(180, 255), 0, 0)
+    const MAX_PARTICLE_FORCE = 20
+    player.onHurt(damage => {
+        // anything above 60 launches particles the farthest
+        // 5 is the lowest possible
+        const force = 5 + (damage ?? 10) / (60 as number) * MAX_PARTICLE_FORCE
+        const red = rgb(rand(180, 255), 0, 0)
         emitParticles(() => add([
             pos(player.pos),
             circle(10),
-            color(redOrange),
+            color(red),
             timer(),
             opacity(),
             { vel: vec2() }
-        ]), 15, 5, 360, .5)
+        ]), 15, force, 360, .5)
     })
 
     player.onCollide('blaze', (blaze) => {
