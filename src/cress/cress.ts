@@ -102,6 +102,7 @@ export default function setupCress(rounds: number) {
             turningDirection: '',
             knockbackVel: vec2(),
             angleX: 0,
+            shooting: false,
             stun: (duration: number) => {
                 stunFrames = Math.min(duration, MAX_STUN)
             },
@@ -338,12 +339,10 @@ export default function setupCress(rounds: number) {
     let shootOnLeftSide = false
     const CENTER_OFFSET = 22
     let timeSinceLastShot = 0
-    let shooting = false
-
 
     onButtonDown('primary', () => {
         if (!paused && stunFrames == 0 && !player.charged() && ammo > 0 && Date.now() - lastShotTime > SHOT_COOLDOWN) {
-            shooting = true
+            player.shooting = true
             ammo--
             ammoBar.height = ammo / MAX_AMMO * AMMO_BAR_HEIGHT
             timeSinceLastShot = 0
@@ -365,7 +364,7 @@ export default function setupCress(rounds: number) {
         }
 
         if (ammo == 0 && ammoRefreshTimer == null) {
-            shooting = false
+            player.shooting = false
             ammoBar.tween(0, AMMO_BAR_HEIGHT, AMMO_REFRESH_TIME, (value) => (ammoBar.height = value))
             ammoBarOutline.animation.paused = false
             ammoRefreshTimer = wait(AMMO_REFRESH_TIME, () => {
@@ -378,7 +377,7 @@ export default function setupCress(rounds: number) {
     })
 
     onButtonRelease('primary', () => {
-        shooting = false
+        player.shooting = false
     })
 
     // ammo bar outline

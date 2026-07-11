@@ -1,6 +1,6 @@
 import { setupBackground } from './background'
 import { musicPlayer, shipDescriptions, ships, transition, ZLevels, type Ship } from './main'
-import { connect, peerId, send, setConnectionListener, setOnError } from './network'
+import { connect, peerId, setConnectionListener, setOnError } from './network'
 import type { Vector } from './game'
 import type { GameObj, SpriteComp, PosComp, AnchorComp, TimerComp, ScaleComp, RotateComp } from 'kaplay'
 

@@ -3,9 +3,7 @@ import { ZLevels } from "../main"
 import { setDataListener, isHost } from "../network"
 import { AMMO_REFRESH_TIME, MAX_AMMO } from "./blaze"
 import { shoot } from "../projectiles"
-import { drawStunCircle } from "../player"
 import { Trail } from "../effects"
-import type { CircleComp, ColorComp, GameObj, PosComp } from "kaplay"
 
 
 export default function setupOtherBlaze(rounds: number) {

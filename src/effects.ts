@@ -1,4 +1,4 @@
-import type { GameObj, PosComp, SpriteComp, RotateComp, ScaleComp, AnchorComp, KEventController, Circle, CircleComp, OpacityComp, TimerComp } from "kaplay"
+import type { GameObj, PosComp, SpriteComp, RotateComp, ScaleComp, AnchorComp, KEventController, OpacityComp, TimerComp } from "kaplay"
 import type { Vector } from "./game"
 
 export class DamageOverTime {

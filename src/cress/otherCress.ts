@@ -3,7 +3,6 @@ import { ZLevels } from "../main"
 import { setDataListener, isHost } from "../network"
 import { AMMO_REFRESH_TIME, drawChargeCircle, drawRailgunAimingLine, fireRailgun, MAX_AMMO } from "./cress"
 import { shoot } from "../projectiles"
-import { drawStunCircle } from "../player"
 
 
 export default function setupOtherCress(rounds: number) {
