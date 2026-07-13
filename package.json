@@ -7,7 +7,7 @@
         "dev": "vite --host",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "postversion": "npm run build && firebase deploy"
+        "postversion": "npm run build && firebase deploy && git push"
     },
     "devDependencies": {
         "typescript": "~6.0.2",

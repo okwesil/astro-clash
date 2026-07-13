@@ -129,14 +129,33 @@ function fillScreenWithStars() {
     }
 }
 
-export const BG_COLOR = '#05050c'
+// if amp and offset are both above zero and are the same number the wave will never go below 0
+const oscillate = (freq: number, amp: number, offset: number): number => Math.sin(debug.numFrames() * freq) * amp + offset
+const BG_FREQ = 0.001
+const BG_AMP = 10
+export let BG_COLOR = () => rgb(oscillate(BG_FREQ, BG_AMP, BG_AMP), oscillate(BG_FREQ, BG_AMP, BG_AMP), oscillate(BG_FREQ, BG_AMP, BG_AMP))
+
 export function setupBackground() {
-    setBackground(BG_COLOR as any)
+    setBackground(BG_COLOR() as any)
+
+
+    const swirl = add([
+        rect(width(), height()),
+        pos(0, 0),
+        color(BG_COLOR()),
+        shader("swirl", () => ({
+            highlight: rgb(0.09, 0.09, 0.09),
+            base: rgb(0.1, 0.1, 0.1),
+            u_time: time()
+        }))
+    ])
     fillScreenWithStars()
 
     let timeSincePlanet = 0
     let timeSinceShootingStar = 0
     onUpdate(() => {
+        setBackground(BG_COLOR() as any)
+        swirl.color = BG_COLOR()
         let starsToReAdd = 0
         timeSinceShootingStar += dt()
         timeSincePlanet += dt()

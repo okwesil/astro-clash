@@ -4,8 +4,8 @@ uniform float u_time;
 // Curvature calculation function
 vec2 curve(vec2 uv) {
     uv = (uv - 0.5) * 2.0;       // Remap UV coordinates to [-1.0, 1.0]
-    uv.x *= 1.0 + (uv.y * uv.y) * 0.01; // Adjust X distortion intensity
-    uv.y *= 1.0 + (uv.x * uv.x) * 0.01; // Adjust Y distortion intensity
+    uv.x *= 1.0 + (uv.y * uv.y) * 0.001; // Adjust X distortion intensity
+    uv.y *= 1.0 + (uv.x * uv.x) * 0.001; // Adjust Y distortion intensity
     uv = (uv / 2.0) + 0.5;       // Remap back to [0.0, 1.0]
     return uv * 0.92 + 0.04;     // Slightly scale down to fit boundaries
 }

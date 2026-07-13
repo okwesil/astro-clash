@@ -62,8 +62,8 @@ function select() {
         text(shipDescriptions[selectedShipIndex], {
             size: 30, font: 'pixel', width: width() - 200
         }),
-        pos(width() / 2, height() - 180),
-        anchor('center'),
+        pos(width() / 2, height() / 2 + 170),
+        anchor('top'),
     ])
 
     const SHIP_SCALE = 4

@@ -18,7 +18,9 @@ function menu(reason: string | undefined) {
 
     const back = add([
         pos(10, 10),
-        text('<- back'),
+        text('<- back', {
+            font: 'pixel'
+        }),
         area(),
         scale(),
         timer(),
@@ -38,9 +40,9 @@ function menu(reason: string | undefined) {
 
     const soundToggle = add([
         sprite(musicPlayer.isPlaying ? 'sound on' : 'sound off'),
-        area({ offset: vec2(0, 10) }),
+        area(),
         pos(30, height() + 100),
-        anchor('botleft'),
+        anchor('left'),
         timer(),
         z(ZLevels.indexOf('ui')),
     ])
@@ -48,7 +50,8 @@ function menu(reason: string | undefined) {
     const songText = add([
         text(musicPlayer.song, { size: 30, font: 'pixel' }),
         pos(100, height() + 100),
-        anchor('botleft'),
+        anchor('left'),
+        area(),
         z(ZLevels.indexOf('ui')),
         timer()
     ])

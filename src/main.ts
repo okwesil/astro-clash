@@ -69,8 +69,8 @@ export const ships = [
 ]
 
 export const shipDescriptions = [
-    'An alien spacecraft that seems to use some sort of bio-tech for functioning \n\n Primary: lasers that deal miniscule damage but stun the enemy for a short time \n Secondary: railgun that almost incenerates anything it hits',
-    'A craft of the Emberians that uses fire to smite its enemies \n'
+    'An alien spacecraft that seems to use some sort of bio-tech for functioning \n\n Primary: lasers that deal miniscule damage but stun the enemy for a short time \nSecondary: railgun that almost incenerates anything it hits',
+    'A craft of the Emberians that uses fire to smite its enemies \n\n Primary: Expels a blast of fire that deal minor damage but lights the enemy on fire for 5 seconds \nSecondary: Dashes in the current direction, deals damage if the other player is hit'
 ]
 export type Ship = typeof ships[number]
 
@@ -279,7 +279,7 @@ export async function transition(scene: string, ...args: any[]) {
         z(100000),
         timer(),
         stay(),
-        color(BG_COLOR)
+        color(BG_COLOR())
     ])
 
     rectangle.tween(-rectangle.width, 0, TRANSITION_DURATION, (value) => (rectangle.pos.x = value))
@@ -311,8 +311,8 @@ const fpsVisual = add([
     }
 ])
 
-loadShaderURL('crt-tv', null, '/assets/shaders/crt.glsl')
-// loadShaderURL('background', null, '/assets/shaders/background.glsl')
+loadShaderURL('crt-tv', null, '/shaders/crt.glsl')
+loadShaderURL('swirl', null, '/shaders/swirl.glsl')
 usePostEffect('crt-tv');
 
 
