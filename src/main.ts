@@ -46,6 +46,7 @@ const singleSprites: { name: string, path: string }[] = [
     { name: 'star', path: '/assets/star.png' },
     { name: 'ringed planet', path: '/assets/ringed planet.png' },
     { name: 'base planet', path: '/assets/base planet.png' },
+    { name: 'spotted planet', path: '/assets/spotted planet.png' },
     { name: 'sound on', path: '/assets/sound on.png' },
     { name: 'sound off', path: '/assets/sound off.png' },
     { name: 'blaze', path: '/assets/blaze/blaze.png' },
