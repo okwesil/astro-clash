@@ -1,3 +1,4 @@
+declare const __APP_VERSION__: string;
 import { setupBackground } from "./background"
 import { musicPlayer, transition } from "./main";
 
@@ -76,4 +77,12 @@ function title() {
             rectangle.tween(width(), 0, 0.1, (value) => rectangle.width = value)
         }
     })
+
+    // verstion text
+    add([
+        pos(width() / 2, height() - 10),
+        anchor('bot'),
+        text(`v${__APP_VERSION__}`, { font: 'pixel' }),
+        opacity(0.5)
+    ])
 }
