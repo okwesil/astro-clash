@@ -1,5 +1,5 @@
 import type { Vector } from "./game"
-import { ZLevels } from "./main"
+import { isChromebook, ZLevels } from "./main"
 
 
 function choose<T>(...stuff: T[]): T {
@@ -134,20 +134,27 @@ const oscillate = (freq: number, amp: number, offset: number): number => Math.si
 const BG_FREQ = 0.001
 const BG_AMP = 10
 export let BG_COLOR = () => rgb(oscillate(BG_FREQ, BG_AMP, BG_AMP), oscillate(BG_FREQ, BG_AMP, BG_AMP), oscillate(BG_FREQ, BG_AMP, BG_AMP))
+type Color = ReturnType<typeof rgb>
+const colorAlmostEqual = (c1: Color, c2: Color) => Math.abs(c1.r - c2.r) < 0.01 && Math.abs(c1.g - c2.g) < 0.01 && Math.abs(c1.b - c2.b) < 0.01
 
 export function setupBackground() {
     setBackground(BG_COLOR() as any)
 
 
+    const nudge = () => rand(-0.1, 0.09)
+    let targetColor = rgb(0.09 + nudge(), 0.09 + nudge(), 0.09 + nudge())
+    let highlight = rgb(0.09, 0.09, 0.09)
     const swirl = add([
         rect(width(), height()),
         pos(0, 0),
         color(BG_COLOR()),
-        shader("swirl", () => ({
-            highlight: rgb(0.09, 0.09, 0.09),
-            base: rgb(0.1, 0.1, 0.1),
-            u_time: time()
-        }))
+        (!isChromebook ?
+            shader("swirl", () => ({
+                highlight: highlight,
+                base: rgb(0.1, 0.1, 0.1),
+                u_time: time()
+            }))
+            : opacity(0))
     ])
     fillScreenWithStars()
 
@@ -159,6 +166,13 @@ export function setupBackground() {
         let starsToReAdd = 0
         timeSinceShootingStar += dt()
         timeSincePlanet += dt()
+
+        if (!isChromebook) {
+            highlight = highlight.lerp(targetColor, 0.01)
+            if (colorAlmostEqual(highlight, targetColor)) {
+                targetColor = rgb(highlight.r + nudge(), highlight.g + nudge(), highlight.b + nudge())
+            }
+        }
 
         if (timeSinceShootingStar > 5) {
             if (randi(0, 9) < 3) {

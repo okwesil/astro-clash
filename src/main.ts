@@ -1,4 +1,4 @@
-import kaplay, { type AreaComp, type AudioPlay, type GameObj, type ScaleComp, type TimerComp } from "kaplay"
+import kaplay, { type AudioPlay } from "kaplay"
 import "kaplay/global"
 import { setupGame } from './game'
 import { setupMenu } from './menu'
@@ -80,10 +80,10 @@ const songs = [
     'unison',
     'shwang',
     'showdown',
+    'crushed'
 ]
 
 const equalTo = <T>(array1: T[], array2: T[]): boolean => array1.length == array2.length && array1.every((value) => array2.includes(value))
-
 type Song = typeof songs[number]
 
 const MUSIC_VOLUME = 0.6
@@ -170,7 +170,6 @@ async function loadAllSounds() {
 
 export const musicPlayer = new MusicPlayer()
 loadAllSounds()
-
 
 
 loadSprite('shooting star', '/assets/shooting star.png', {
@@ -304,7 +303,9 @@ const fpsVisual = add([
     opacity(1),
     stay(),
     timer(),
+    color(WHITE),
     'ui',
+    z(1000),
     {
         update: () => {
             fpsVisual.text = debug.fps().toString()
@@ -312,9 +313,16 @@ const fpsVisual = add([
     }
 ])
 
-loadShaderURL('crt-tv', null, '/shaders/crt.glsl')
-loadShaderURL('swirl', null, '/shaders/swirl.glsl')
-usePostEffect('crt-tv');
+
+export const isChromebook = navigator.userAgent.includes("CrOS");
+
+if (!isChromebook) {
+    loadShaderURL('crt-tv', null, '/shaders/crt.glsl')
+    loadShaderURL('swirl', null, '/shaders/swirl.glsl')
+    usePostEffect('crt-tv');
+}
+
+console.log(navigator)
 
 
 setupBackground()
